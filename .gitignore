@@ -22,3 +22,13 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+
+########################
+# Project specific
+########################
+
+# Ignore all files in the sketch directory
+.sketch/*
+.env.test
+coverage/*
