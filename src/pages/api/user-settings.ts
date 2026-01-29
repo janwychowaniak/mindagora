@@ -32,6 +32,7 @@ export const GET = async (context: APIContext) => {
   });
 
   if (error) {
+    // eslint-disable-next-line no-console
     console.error("User settings lookup failed", {
       route: "/api/user-settings",
       method: "GET",
