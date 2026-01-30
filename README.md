@@ -161,6 +161,7 @@ After launching the application:
 - Secure storage of API keys in Supabase
 - Masked input with show/hide toggle
 - API key validation with timeout handling
+- API responses include `Cache-Control: no-store` for sensitive data
 
 #### AI Participants Management
 - Create AI participants with unique aliases (max 30 characters)

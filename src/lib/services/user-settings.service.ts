@@ -31,3 +31,41 @@ export const getUserSettings = async ({
 
   return { data, error: null };
 };
+
+export const updateUserSettings = async ({
+  supabase,
+  userId,
+  openrouterApiKey,
+}: {
+  supabase: SupabaseClient;
+  userId: string;
+  openrouterApiKey: string;
+}): Promise<UserSettingsResult> => {
+  const { data, error } = await supabase
+    .from("user_settings")
+    .update({ openrouter_api_key: openrouterApiKey })
+    .eq("user_id", userId)
+    .select("id,user_id,openrouter_api_key,created_at")
+    .single();
+
+  if (error) {
+    return {
+      data: null,
+      error: {
+        message: error.message,
+        code: error.code,
+      },
+    };
+  }
+
+  if (!data) {
+    return {
+      data: null,
+      error: {
+        message: "User settings record missing after update.",
+      },
+    };
+  }
+
+  return { data, error: null };
+};
