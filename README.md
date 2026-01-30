@@ -114,6 +114,10 @@ MindAgora is designed for users who:
      # Supabase
      PUBLIC_SUPABASE_URL=your_supabase_project_url
      PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+     # OpenRouter (optional headers for request attribution)
+     OPENROUTER_HTTP_REFERER=http://localhost:4321
+     OPENROUTER_X_TITLE=MindAgora
      ```
 
 6. **Run the development server**
