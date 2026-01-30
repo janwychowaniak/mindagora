@@ -25,10 +25,8 @@ const openRouterErrorResponseSchema = z.object({
 });
 
 const openRouterKeyInfoResponseSchema = z.object({
-  data: z.object({
-    hash: z.string(),
-    disabled: z.boolean().optional(),
-  }),
+  // OpenRouter payload shape varies; require `data` as an object and allow extra fields.
+  data: z.object({}).passthrough(),
 });
 
 const pricingValueSchema = z.union([z.string(), z.number()]).transform((value) => String(value));
