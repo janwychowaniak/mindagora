@@ -45,3 +45,12 @@ create index idx_messages_conversation_created on messages(conversation_id, crea
 --   - no index on model_id: not used in filtering
 --   - no index on color: display-only property
 
+-- ============================================================================
+-- indexes for delete cascade performance
+-- ============================================================================
+
+-- index to prevent full table scan on messages during participant deletion
+-- on delete set null triggers update on messages table
+create index if not exists idx_messages_ai_participant_id
+on messages(ai_participant_id)
+where ai_participant_id is not null;
