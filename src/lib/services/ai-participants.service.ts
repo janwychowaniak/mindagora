@@ -11,6 +11,11 @@ interface CreateAiParticipantResult {
   error: { message: string; code?: string } | null;
 }
 
+interface DeleteAiParticipantResult {
+  deleted: boolean;
+  error: { message: string; code?: string } | null;
+}
+
 export const getAiParticipants = async ({
   supabase,
   userId,
@@ -84,4 +89,46 @@ export const createAiParticipant = async ({
   }
 
   return { data, error: null };
+};
+
+export const deleteAiParticipant = async ({
+  supabase,
+  participantId,
+}: {
+  supabase: SupabaseClient;
+  participantId: string;
+}): Promise<DeleteAiParticipantResult> => {
+  const { data: participant, error: selectError } = await supabase
+    .from("ai_participants")
+    .select("id")
+    .eq("id", participantId)
+    .maybeSingle();
+
+  if (selectError) {
+    return {
+      deleted: false,
+      error: {
+        message: selectError.message,
+        code: selectError.code,
+      },
+    };
+  }
+
+  if (!participant) {
+    return { deleted: false, error: null };
+  }
+
+  const { error: deleteError } = await supabase.from("ai_participants").delete().eq("id", participantId);
+
+  if (deleteError) {
+    return {
+      deleted: false,
+      error: {
+        message: deleteError.message,
+        code: deleteError.code,
+      },
+    };
+  }
+
+  return { deleted: true, error: null };
 };
