@@ -1,8 +1,23 @@
 import type { SupabaseClient } from "../../db/supabase.client.ts";
-import type { AiParticipantDTO, CreateAiParticipantCommand, CreateAiParticipantResponseDTO } from "../../types.ts";
+import type {
+  AiParticipantDTO,
+  AiParticipantSummaryDTO,
+  CreateAiParticipantCommand,
+  CreateAiParticipantResponseDTO,
+} from "../../types.ts";
 
 interface AiParticipantsResult {
   data: AiParticipantDTO[] | null;
+  error: { message: string; code?: string } | null;
+}
+
+interface AiParticipantCountResult {
+  count: number | null;
+  error: { message: string; code?: string } | null;
+}
+
+interface AiParticipantSummaryResult {
+  data: AiParticipantSummaryDTO | null;
   error: { message: string; code?: string } | null;
 }
 
@@ -49,6 +64,60 @@ export const getAiParticipants = async ({
   }
 
   return { data, error: null };
+};
+
+export const countAiParticipants = async (
+  supabase: SupabaseClient,
+  userId: string
+): Promise<AiParticipantCountResult> => {
+  const { count, error } = await supabase
+    .from("ai_participants")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId);
+
+  if (error) {
+    return {
+      count: null,
+      error: {
+        message: error.message,
+        code: error.code,
+      },
+    };
+  }
+
+  if (count === null) {
+    return {
+      count: null,
+      error: {
+        message: "AI participants count returned null.",
+      },
+    };
+  }
+
+  return { count, error: null };
+};
+
+export const getAiParticipantSummary = async (
+  supabase: SupabaseClient,
+  participantId: string
+): Promise<AiParticipantSummaryResult> => {
+  const { data, error } = await supabase
+    .from("ai_participants")
+    .select("id,alias,model_id,color")
+    .eq("id", participantId)
+    .maybeSingle();
+
+  if (error) {
+    return {
+      data: null,
+      error: {
+        message: error.message,
+        code: error.code,
+      },
+    };
+  }
+
+  return { data: data ?? null, error: null };
 };
 
 export const createAiParticipant = async ({
