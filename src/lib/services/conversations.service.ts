@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "../../db/supabase.client.ts";
 import type {
   AiParticipantSummaryDTO,
+  ConversationListItemDTO,
   ConversationMessageDTO,
   CreateConversationResponseDTO,
   CreateMessageResponseDTO,
@@ -37,6 +38,11 @@ interface CreateMessagePairResult {
   } | null;
 }
 
+interface ConversationListResult {
+  data: ConversationListItemDTO[] | null;
+  error: { message: string; code?: string } | null;
+}
+
 const extractErrorCode = (error: unknown): string | undefined => {
   if (!error || typeof error !== "object") {
     return undefined;
@@ -61,6 +67,168 @@ const normalizeAiParticipant = (
   }
 
   return value;
+};
+
+interface EmbeddedMessageCountRow {
+  count?: unknown;
+}
+
+interface ConversationWithEmbeddedCountRow {
+  id: string;
+  user_id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  message_count?: EmbeddedMessageCountRow[] | null;
+}
+
+const isEmbeddedMessageCountRows = (value: unknown): value is EmbeddedMessageCountRow[] => {
+  if (!Array.isArray(value)) {
+    return false;
+  }
+
+  return value.every((entry) => typeof entry === "object" && entry !== null);
+};
+
+const getEmbeddedMessageCount = (row: ConversationWithEmbeddedCountRow): number => {
+  const embedded = row.message_count;
+
+  if (!isEmbeddedMessageCountRows(embedded)) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[GET /api/conversations] Unexpected embedded count shape for conversation ${row.id}. ` +
+        `Raw value: ${JSON.stringify(embedded)}. Defaulting to 0.`
+    );
+    return 0;
+  }
+
+  const rawCount = embedded[0]?.count;
+  if (typeof rawCount !== "number") {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[GET /api/conversations] Unexpected embedded count shape for conversation ${row.id}. ` +
+        `Raw value: ${JSON.stringify(embedded)}. Defaulting to 0.`
+    );
+    return 0;
+  }
+
+  return rawCount;
+};
+
+const listConversationsForUserWithMessageCountFallback = async ({
+  supabase,
+  userId,
+}: {
+  supabase: SupabaseClient;
+  userId: string;
+}): Promise<ConversationListResult> => {
+  const { data: conversations, error: conversationsError } = await supabase
+    .from("conversations")
+    .select("id,user_id,title,created_at,updated_at")
+    .eq("user_id", userId)
+    .order("updated_at", { ascending: false });
+
+  if (conversationsError) {
+    return {
+      data: null,
+      error: {
+        message: conversationsError.message,
+        code: conversationsError.code,
+      },
+    };
+  }
+
+  if (!conversations) {
+    return {
+      data: null,
+      error: {
+        message: "Conversation list lookup returned null data.",
+      },
+    };
+  }
+
+  if (conversations.length === 0) {
+    return { data: [], error: null };
+  }
+
+  const conversationIds = conversations.map((conversation) => conversation.id);
+  const { data: messageRows, error: messagesError } = await supabase
+    .from("messages")
+    .select("conversation_id")
+    .in("conversation_id", conversationIds);
+
+  if (messagesError) {
+    return {
+      data: null,
+      error: {
+        message: messagesError.message,
+        code: messagesError.code,
+      },
+    };
+  }
+
+  const messageCountByConversationId = new Map<string, number>();
+
+  for (const row of messageRows ?? []) {
+    const currentCount = messageCountByConversationId.get(row.conversation_id) ?? 0;
+    messageCountByConversationId.set(row.conversation_id, currentCount + 1);
+  }
+
+  const normalized: ConversationListItemDTO[] = conversations.map((conversation) => ({
+    ...conversation,
+    message_count: messageCountByConversationId.get(conversation.id) ?? 0,
+  }));
+
+  return { data: normalized, error: null };
+};
+
+export const listConversationsForUserWithMessageCount = async ({
+  supabase,
+  userId,
+}: {
+  supabase: SupabaseClient;
+  userId: string;
+}): Promise<ConversationListResult> => {
+  const { data, error } = await supabase
+    .from("conversations")
+    .select("id,user_id,title,created_at,updated_at,message_count:messages(count)")
+    .eq("user_id", userId)
+    .order("updated_at", { ascending: false });
+
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.warn("[GET /api/conversations] Embedded count query failed. Falling back to 2-query strategy.", {
+      route: "/api/conversations",
+      method: "GET",
+      status: 500,
+      userId,
+      supabase_error_code: error.code,
+    });
+    return listConversationsForUserWithMessageCountFallback({ supabase, userId });
+  }
+
+  if (!data) {
+    return {
+      data: null,
+      error: {
+        message: "Conversation list lookup returned null data.",
+      },
+    };
+  }
+
+  const normalized: ConversationListItemDTO[] = data.map((row) => {
+    const typedRow = row as ConversationWithEmbeddedCountRow;
+    return {
+      id: typedRow.id,
+      user_id: typedRow.user_id,
+      title: typedRow.title,
+      created_at: typedRow.created_at,
+      updated_at: typedRow.updated_at,
+      message_count: getEmbeddedMessageCount(typedRow),
+    };
+  });
+
+  return { data: normalized, error: null };
 };
 
 export const assertConversationOwnedByUser = async ({

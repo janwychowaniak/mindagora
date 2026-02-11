@@ -2,7 +2,10 @@ import type { APIContext } from "astro";
 import { z } from "zod";
 
 import { countAiParticipants, getAiParticipantSummary } from "../../lib/services/ai-participants.service.ts";
-import { createConversationWithInitialExchange } from "../../lib/services/conversations.service.ts";
+import {
+  createConversationWithInitialExchange,
+  listConversationsForUserWithMessageCount,
+} from "../../lib/services/conversations.service.ts";
 import {
   OpenRouterHttpError,
   OpenRouterInvalidResponseError,
@@ -14,6 +17,7 @@ import { getUserSettings } from "../../lib/services/user-settings.service.ts";
 import type {
   ApiErrorResponseDTO,
   AiParticipantSummaryDTO,
+  ConversationListItemDTO,
   CreateConversationCommand,
   CreateConversationResponseDTO,
   OpenRouterChatRequest,
@@ -62,6 +66,48 @@ const formatZodErrors = (error: z.ZodError): Record<string, string> => {
   }
 
   return details;
+};
+
+export const GET = async (context: APIContext) => {
+  const { locals } = context;
+
+  if (!locals.user) {
+    return jsonError(401, "Unauthorized", "Missing or invalid authentication token");
+  }
+
+  const { data: conversations, error } = await listConversationsForUserWithMessageCount({
+    supabase: locals.supabase,
+    userId: locals.user.id,
+  });
+
+  if (error) {
+    // eslint-disable-next-line no-console
+    console.error("Conversation list lookup failed", {
+      route,
+      method: "GET",
+      status: 500,
+      supabase_error_code: error.code,
+    });
+    return jsonError(500, "Internal Server Error", "An unexpected error occurred");
+  }
+
+  if (!conversations) {
+    // eslint-disable-next-line no-console
+    console.error("Conversation list lookup failed", {
+      route,
+      method: "GET",
+      status: 500,
+    });
+    return jsonError(500, "Internal Server Error", "An unexpected error occurred");
+  }
+
+  return new Response(JSON.stringify(conversations satisfies ConversationListItemDTO[]), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store",
+    },
+  });
 };
 
 export const POST = async (context: APIContext) => {
