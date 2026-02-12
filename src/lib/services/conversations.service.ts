@@ -39,6 +39,11 @@ interface UpdateConversationResult {
   error: { message: string; code?: string } | null;
 }
 
+interface DeleteConversationResult {
+  data: { id: string } | null;
+  error: { message: string; code?: string } | null;
+}
+
 interface CreateMessagePairResult {
   data: CreateMessageResponseDTO | null;
   error: {
@@ -317,6 +322,36 @@ export const updateConversationTitleForUser = async ({
     .eq("id", conversationId)
     .eq("user_id", userId)
     .select("id,user_id,title,created_at,updated_at")
+    .maybeSingle();
+
+  if (error) {
+    return {
+      data: null,
+      error: {
+        message: error.message,
+        code: error.code,
+      },
+    };
+  }
+
+  return { data, error: null };
+};
+
+export const deleteConversationForUserById = async ({
+  supabase,
+  userId,
+  conversationId,
+}: {
+  supabase: SupabaseClient;
+  userId: string;
+  conversationId: string;
+}): Promise<DeleteConversationResult> => {
+  const { data, error } = await supabase
+    .from("conversations")
+    .delete()
+    .eq("id", conversationId)
+    .eq("user_id", userId)
+    .select("id")
     .maybeSingle();
 
   if (error) {
