@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "../../db/supabase.client.ts";
 import type {
   AiParticipantSummaryDTO,
+  ConversationDTO,
   ConversationListItemDTO,
   ConversationMessageDTO,
   CreateConversationResponseDTO,
@@ -25,6 +26,11 @@ interface ConversationOwnershipResult {
 
 interface ConversationMessagesResult {
   data: ConversationMessageDTO[] | null;
+  error: { message: string; code?: string } | null;
+}
+
+interface ConversationLookupResult {
+  data: ConversationDTO | null;
   error: { message: string; code?: string } | null;
 }
 
@@ -258,6 +264,35 @@ export const assertConversationOwnedByUser = async ({
   }
 
   return { owned: Boolean(data), error: null };
+};
+
+export const getConversationForUserById = async ({
+  supabase,
+  userId,
+  conversationId,
+}: {
+  supabase: SupabaseClient;
+  userId: string;
+  conversationId: string;
+}): Promise<ConversationLookupResult> => {
+  const { data, error } = await supabase
+    .from("conversations")
+    .select("id,user_id,title,created_at,updated_at")
+    .eq("id", conversationId)
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    return {
+      data: null,
+      error: {
+        message: error.message,
+        code: error.code,
+      },
+    };
+  }
+
+  return { data, error: null };
 };
 
 export const getConversationMessages = async ({
