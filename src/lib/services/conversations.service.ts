@@ -34,6 +34,11 @@ interface ConversationLookupResult {
   error: { message: string; code?: string } | null;
 }
 
+interface UpdateConversationResult {
+  data: ConversationDTO | null;
+  error: { message: string; code?: string } | null;
+}
+
 interface CreateMessagePairResult {
   data: CreateMessageResponseDTO | null;
   error: {
@@ -280,6 +285,38 @@ export const getConversationForUserById = async ({
     .select("id,user_id,title,created_at,updated_at")
     .eq("id", conversationId)
     .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) {
+    return {
+      data: null,
+      error: {
+        message: error.message,
+        code: error.code,
+      },
+    };
+  }
+
+  return { data, error: null };
+};
+
+export const updateConversationTitleForUser = async ({
+  supabase,
+  userId,
+  conversationId,
+  title,
+}: {
+  supabase: SupabaseClient;
+  userId: string;
+  conversationId: string;
+  title: string;
+}): Promise<UpdateConversationResult> => {
+  const { data, error } = await supabase
+    .from("conversations")
+    .update({ title })
+    .eq("id", conversationId)
+    .eq("user_id", userId)
+    .select("id,user_id,title,created_at,updated_at")
     .maybeSingle();
 
   if (error) {
