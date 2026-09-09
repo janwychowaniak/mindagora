@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# 1) gitleaks — staged file CONTENT (advisory layer; CI is the non-bypassable one)
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --config .gitleaks.toml --redact -v --no-banner \
+    || { echo "❌ gitleaks: secret in staged changes — commit blocked" >&2; exit 1; }
+else
+  echo "⚠️  gitleaks not installed — skipping secret scan" >&2
+fi
+# 2) lint-staged (eslint --fix / prettier on staged files; config in package.json)
+npx lint-staged

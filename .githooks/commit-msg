@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# gitleaks — the commit MESSAGE body ($1 = message file). Staged-file scans are blind to this channel.
+command -v gitleaks >/dev/null 2>&1 || { echo "⚠️  gitleaks not installed — skipping" >&2; exit 0; }
+# --config is REQUIRED: autodetection follows --source ($1 lives in .git/), not the cwd.
+gitleaks detect --no-git --source "$1" --config .gitleaks.toml --redact -v --no-banner \
+  || { echo "❌ gitleaks: secret in the commit MESSAGE — commit blocked" >&2; exit 1; }
