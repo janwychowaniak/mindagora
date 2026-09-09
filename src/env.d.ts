@@ -14,6 +14,9 @@ declare global {
 interface ImportMetaEnv {
   readonly SUPABASE_URL: string;
   readonly SUPABASE_KEY: string;
+  // Optional OpenRouter attribution headers (see openrouter.service.ts)
+  readonly OPENROUTER_HTTP_REFERER?: string;
+  readonly OPENROUTER_X_TITLE?: string;
 }
 
 interface ImportMeta {
