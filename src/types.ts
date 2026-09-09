@@ -137,7 +137,7 @@ export interface OpenRouterChatResponse {
 // DDD Pattern: Conversation is the Aggregate Root.
 // - Messages are part of this aggregate, not independent entities
 // - All message operations go through conversation endpoints
-// - Ensures consistency: no orphaned messages, atomic message pairs
+// - Ensures consistency: no orphaned messages; message pairs kept consistent by cleanup (NO RPC)
 // =============================================================================
 
 export type ConversationDTO = ConversationRow;
@@ -165,8 +165,9 @@ export type ConversationDetailsDTO = ConversationDTO & {
  *
  * Business Invariants (enforced at API level):
  * - User must have at least 2 AI participants configured before creating conversation
- * - Conversation is created atomically with first user+AI message pair
- * - If AI response fails, entire operation rolls back (no orphaned conversations)
+ * - Conversation is created together with the first user+AI message pair (sequential inserts
+ *   with cleanup on failure — NO RPC / no DB transaction; application-level atomicity)
+ * - OpenRouter is called before any insert, so an AI failure leaves nothing behind
  * - Title is auto-generated from user_message if not provided
  *
  * Aggregate Boundary: This is the only way to create a conversation.
@@ -192,7 +193,7 @@ export type UpdateConversationResponseDTO = ConversationDTO;
  *
  * Business Logic:
  * - Loads FULL conversation history as context for AI (shared context between models)
- * - Creates atomic transaction: user message + AI response
+ * - Persists user message + AI response sequentially with cleanup on failure (NO RPC)
  * - conversation_id comes from URL path, not body (aggregate boundary)
  *
  * Aggregate Boundary: Messages can only be added through conversation context.
