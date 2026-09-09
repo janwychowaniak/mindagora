@@ -268,7 +268,8 @@ export const POST = async (context: APIContext) => {
     return jsonError(500, "Internal Server Error", "OpenRouter request failed");
   }
 
-  const title = command.title ?? `${userMessage.slice(0, 50)}...`;
+  // Auto-title: first 50 chars; ellipsis only when the message was actually truncated (PRD US-015).
+  const title = command.title ?? (userMessage.length > 50 ? `${userMessage.slice(0, 50)}...` : userMessage);
 
   const { data: conversation, error: createError } = await createConversationWithInitialExchange({
     supabase: locals.supabase,
