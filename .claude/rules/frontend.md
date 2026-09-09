@@ -1,9 +1,9 @@
 ---
 paths:
-  - "src/components/**"
-  - "src/styles/**"
-  - "src/pages/**/*.astro"
-  - "src/layouts/**"
+  - "**/src/components/**"
+  - "**/src/styles/**"
+  - "**/src/pages/**/*.astro"
+  - "**/src/layouts/**"
 ---
 
 # Frontend rules

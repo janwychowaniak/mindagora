@@ -1,9 +1,9 @@
 ---
 paths:
-  - "src/pages/api/**"
-  - "src/lib/services/**"
-  - "src/middleware/**"
-  - "src/types.ts"
+  - "**/src/pages/api/**"
+  - "**/src/lib/services/**"
+  - "**/src/middleware/**"
+  - "**/src/types.ts"
 ---
 
 # API layer rules

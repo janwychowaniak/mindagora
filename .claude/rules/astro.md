@@ -1,9 +1,9 @@
 ---
 paths:
-  - "src/pages/**/*.astro"
-  - "src/layouts/**"
-  - "src/components/**/*.astro"
-  - "astro.config.mjs"
+  - "**/src/pages/**/*.astro"
+  - "**/src/layouts/**"
+  - "**/src/components/**/*.astro"
+  - "**/astro.config.mjs"
 ---
 
 # Astro rules

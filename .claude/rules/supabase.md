@@ -1,7 +1,7 @@
 ---
 paths:
-  - "supabase/**"
-  - "src/db/**"
+  - "**/supabase/**"
+  - "**/src/db/**"
 ---
 
 # Supabase and database rules

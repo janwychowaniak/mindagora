@@ -1,6 +1,6 @@
 ---
 paths:
-  - "src/components/**/*.tsx"
+  - "**/src/components/**/*.tsx"
 ---
 
 # React rules
