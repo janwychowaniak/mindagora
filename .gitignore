@@ -28,8 +28,5 @@ pnpm-debug.log*
 # Project specific
 ########################
 
-# Ignore all files in the sketch directory
-.sketch/*
 .env.test
 coverage/*
-scripts/
