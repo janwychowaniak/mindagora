@@ -196,7 +196,7 @@ export type UpdateConversationResponseDTO = ConversationDTO;
  * - conversation_id comes from URL path, not body (aggregate boundary)
  *
  * Aggregate Boundary: Messages can only be added through conversation context.
- * Endpoint: POST /api/conversations/:conversationId/messages
+ * Endpoint: POST /api/conversations/:id/messages
  */
 export interface CreateMessageCommand {
   content: MessageRow["content"];
