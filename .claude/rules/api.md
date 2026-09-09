@@ -83,3 +83,13 @@ Keep schemas inline in the endpoint file until they are reused.
 `jsonError` / `formatZodErrors` duplicated per endpoint; `PUT /api/user-settings` still uses "Bad Request"
 for body validation; timeout mapped to 502 in one endpoint and 504 in others; `Cache-Control: no-store`
 missing on some error responses; two service functions with positional params.
+
+## Starter recommendations (backend)
+
+_Starter recommendations from the 10x-astro-starter rules, carried over verbatim (experienced-developer guidance for this ecosystem). Project-specific rules and deliberate deviations are listed separately below._
+
+- Use Supabase for backend services, including authentication and database interactions.
+- Follow Supabase guidelines for security and performance.
+- Use Zod schemas to validate data exchanged with the backend.
+- Use supabase from context.locals in Astro routes instead of importing supabaseClient directly
+- Use SupabaseClient type from `src/db/supabase.client.ts`, not from `@supabase/supabase-js`

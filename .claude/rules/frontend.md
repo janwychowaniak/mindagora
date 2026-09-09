@@ -8,18 +8,45 @@ paths:
 
 # Frontend rules
 
-## Styling (Tailwind 4)
+## Starter recommendations
 
-- Utility classes first; `@layer` for base/components/utilities; arbitrary values (`w-[123px]`) for one-offs.
-- Dark mode is the only theme in MVP (no toggle); design for it directly.
-- Responsive and state variants (`sm:`, `hover:`, `focus-visible:`) where they matter.
+_Starter recommendations from the 10x-astro-starter rules, carried over verbatim (experienced-developer guidance for this ecosystem). Project-specific rules and deliberate deviations are listed separately below._
 
-## Accessibility
+### General Guidelines
 
-- ARIA landmarks for regions; roles only for custom elements without a semantic equivalent.
-- `aria-expanded`/`aria-controls` on expandable UI, `aria-live` for dynamic updates (new messages, errors),
-  `aria-label`/`aria-labelledby` for unlabeled controls, `aria-current` for the active item.
-- Do not add redundant ARIA to native elements.
+- Use Astro components (.astro) for static content and layout
+- Implement framework components in React only when interactivity is needed
+
+### Guidelines for Styling
+
+#### Tailwind
+
+- Use the @layer directive to organize styles into components, utilities, and base layers
+- Use arbitrary values with square brackets (e.g., w-[123px]) for precise one-off designs
+- Implement the Tailwind configuration file for customizing theme, plugins, and variants
+- Leverage the theme() function in CSS for accessing Tailwind theme values
+- Implement dark mode with the dark: variant
+- Use responsive variants (sm:, md:, lg:, etc.) for adaptive designs
+- Leverage state variants (hover:, focus-visible:, active:, etc.) for interactive elements
+
+### Guidelines for Accessibility
+
+#### ARIA Best Practices
+
+- Use ARIA landmarks to identify regions of the page (main, navigation, search, etc.)
+- Apply appropriate ARIA roles to custom interface elements that lack semantic HTML equivalents
+- Set aria-expanded and aria-controls for expandable content like accordions and dropdowns
+- Use aria-live regions with appropriate politeness settings for dynamic content updates
+- Implement aria-hidden to hide decorative or duplicative content from screen readers
+- Apply aria-label or aria-labelledby for elements without visible text labels
+- Use aria-describedby to associate descriptive text with form inputs or complex elements
+- Implement aria-current for indicating the current item in a set, navigation, or process
+- Avoid redundant ARIA that duplicates the semantics of native HTML elements
+
+## Project notes (deliberate deviations and clarifications)
+
+- Tailwind 4 here is configured CSS-first: there is no `tailwind.config.js`; theme customisation lives in `src/styles/global.css` (`@import "tailwindcss"`, `@theme`, CSS variables). The starter's "Tailwind configuration file" and `theme()` recommendations date from Tailwind 3 — prefer CSS variables and `@theme` unless a plugin needs the JS config.
+- The MVP ships dark mode only (PRD §3.8, no toggle). Structure styles so that a light theme could be added later, but do not build the toggle.
 
 ## Product constraints from the PRD (MVP)
 

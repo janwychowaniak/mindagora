@@ -5,11 +5,37 @@ paths:
 
 # React rules
 
-- Functional components with hooks; never `"use client"` or other Next.js directives (this is Astro).
-- Extract reusable logic into custom hooks in `src/components/hooks`.
-- `React.memo`, `useCallback`, `useMemo` only where a measurable re-render cost justifies them.
-- `React.lazy` + `Suspense` for code-splitting heavy islands.
-- `useId()` for accessibility ids; `useTransition` for non-urgent updates; consider `useOptimistic` for forms.
-- shadcn/ui components live in `src/components/ui` and are imported via the `@/` alias
-  (`import { Button } from "@/components/ui/button"`). Add new ones with `npx shadcn@latest add <name>`
-  (style: new-york, base colour: neutral, CSS variables).
+## Starter recommendations
+
+_Starter recommendations from the 10x-astro-starter rules, carried over verbatim (experienced-developer guidance for this ecosystem). Project-specific rules and deliberate deviations are listed separately below._
+
+- Use functional components with hooks instead of class components
+- Never use "use client" and other Next.js directives as we use React with Astro
+- Extract logic into custom hooks in `src/components/hooks`
+- Implement React.memo() for expensive components that render often with the same props
+- Utilize React.lazy() and Suspense for code-splitting and performance optimization
+- Use the useCallback hook for event handlers passed to child components to prevent unnecessary re-renders
+- Prefer useMemo for expensive calculations to avoid recomputation on every render
+- Implement useId() for generating unique IDs for accessibility attributes
+- Consider using the new useOptimistic hook for optimistic UI updates in forms
+- Use useTransition for non-urgent state updates to keep the UI responsive
+
+## shadcn/ui (starter helper, verbatim, translated)
+
+Components live in `src/components/ui` (aliases from `components.json`); import via the configured `@/` alias:
+
+```tsx
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+```
+
+Install additional components with the shadcn CLI: `npx shadcn@latest add [component-name]` (e.g. `npx shadcn@latest add accordion`).
+Important: `npx shadcn-ui@latest` is deprecated — use `npx shadcn@latest`. Full list: https://ui.shadcn.com/r
+
+Popular components: Accordion, Alert, AlertDialog, AspectRatio, Avatar, Calendar, Checkbox, Collapsible, Command,
+ContextMenu, DataTable, DatePicker, Dropdown Menu, Form, Hover Card, Menubar, Navigation Menu, Popover, Progress,
+Radio Group, ScrollArea, Select, Separator, Sheet, Skeleton, Slider, Switch, Table, Textarea, Sonner (previously Toast),
+Toggle, Tooltip.
+
+Styling: the "new-york" style with the "neutral" base colour and CSS variables for theming, as configured in `components.json`.

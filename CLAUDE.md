@@ -24,6 +24,7 @@ GitHub Actions (planned) · Node 24 (`.nvmrc`) · Supabase CLI as a devDependenc
   (single source of truth for API contracts)
 - `src/components/` — Astro for static markup, React only where interactivity is needed; `src/components/ui`
   is shadcn/ui
+- `src/lib/` — services and helpers; `src/assets/` — static internal assets; `public/` — public assets
 - `supabase/migrations/` — nine atomic migrations (enums → tables → indexes → triggers → RLS)
 - `.githooks/` — gitleaks + lint-staged hooks; after cloning run `git config core.hooksPath .githooks`
 
@@ -35,6 +36,20 @@ GitHub Actions (planned) · Node 24 (`.nvmrc`) · Supabase CLI as a devDependenc
 
 Environment: `SUPABASE_URL`, `SUPABASE_KEY` (anon), optional `OPENROUTER_HTTP_REFERER`, `OPENROUTER_X_TITLE`.
 The per-user OpenRouter key is stored in `user_settings`, never in env.
+
+## Coding practices
+
+_Starter recommendations from the 10x-astro-starter rules, carried over verbatim (experienced-developer guidance for this ecosystem). Project-specific rules and deliberate deviations are listed separately below._
+
+- Use feedback from linters to improve the code when making changes.
+- Prioritize error handling and edge cases.
+- Handle errors and edge cases at the beginning of functions.
+- Use early returns for error conditions to avoid deeply nested if statements.
+- Place the happy path last in the function for improved readability.
+- Avoid unnecessary else statements; use if-return pattern instead.
+- Use guard clauses to handle preconditions and invalid states early.
+- Implement proper error logging and user-friendly error messages.
+- Consider using custom error types or error factories for consistent error handling.
 
 ## Working agreements
 
