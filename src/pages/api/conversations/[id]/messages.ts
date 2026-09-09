@@ -41,8 +41,10 @@ const jsonError = (status: number, error: string, details: ApiErrorResponseDTO["
     }
   );
 
+// 412: authenticated, but the onboarding precondition (configured API key) is not met.
+// 401 is reserved for a missing/invalid session, so the UI can branch on status, not on the label.
 const noApiKeyError = () =>
-  jsonError(401, "No API key", "OpenRouter API key not configured. Please add it in Settings.");
+  jsonError(412, "No API key", "OpenRouter API key not configured. Please add it in Settings.");
 
 const formatZodErrors = (error: z.ZodError): Record<string, string> => {
   const flattened = error.flatten().fieldErrors;
