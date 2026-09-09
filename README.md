@@ -19,6 +19,7 @@ MindAgora eliminates the need to manually switch between different AI services (
 ### The Problem
 
 Working with multiple AI models currently requires:
+
 - Opening multiple tabs/applications
 - Manually copying conversation context between services
 - Constructing summaries of previous exchanges
@@ -37,6 +38,7 @@ Working with multiple AI models currently requires:
 ### Target Users
 
 MindAgora is designed for users who:
+
 - Work with multiple AI models regularly
 - Need to compare different AI perspectives within a single discussion
 - Want to maintain conversation context without manual copying and pasting
@@ -45,6 +47,7 @@ MindAgora is designed for users who:
 ## Tech Stack
 
 ### Frontend
+
 - **Astro 5** - Fast, efficient pages with minimal JavaScript
 - **React 19** - Interactive components where needed
 - **TypeScript 5** - Static typing and improved IDE support
@@ -53,6 +56,7 @@ MindAgora is designed for users who:
 - **Lucide React** - Icon library
 
 ### Backend
+
 - **Supabase** - Backend-as-a-Service providing:
   - PostgreSQL database
   - Built-in user authentication
@@ -60,16 +64,19 @@ MindAgora is designed for users who:
   - Open-source and self-hostable
 
 ### AI Integration
+
 - **OpenRouter.ai** - Unified API for accessing multiple AI models:
   - Access to OpenAI, Anthropic, Google, and many other providers
   - Financial limit controls for API keys
   - Consistent interface across different models
 
 ### CI/CD & Hosting
+
 - **GitHub Actions** - CI/CD pipelines
 - **DigitalOcean** - Application hosting via Docker
 
 ### Testing
+
 - **Vitest** - Unit testing framework
 - **React Testing Library** - React component testing
 - **Playwright** - End-to-end testing
@@ -79,26 +86,28 @@ MindAgora is designed for users who:
 
 ### Prerequisites
 
-- **Node.js**: Version 22.14.0 (specified in `.nvmrc`)
+- **Node.js**: Version 24.13.1 (specified in `.nvmrc`)
   - We recommend using [nvm](https://github.com/nvm-sh/nvm) to manage Node.js versions
   - Run `nvm use` in the project directory to switch to the correct version
 
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd MindAgora
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up Supabase**
-   - Create a [Supabase](https://supabase.com/) account and project
-   - Set up the required database tables (schema documentation coming soon)
+   - Local development: install Docker and run `npx supabase start` (the Supabase CLI is a devDependency). The schema is applied automatically from `supabase/migrations/`; `npx supabase db reset` rebuilds the local database from the migrations
+   - Alternatively create a [Supabase](https://supabase.com/) cloud project and apply `supabase/migrations/` there
    - Configure Supabase authentication settings
    - For local development, disable email verification in Supabase Auth settings
 
@@ -111,22 +120,23 @@ MindAgora is designed for users who:
    - Create a `.env` file in the project root
    - Add the following variables (update with your values):
      ```env
-     # Supabase
-     PUBLIC_SUPABASE_URL=your_supabase_project_url
-     PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+     # Supabase (for the local stack: values from `npx supabase status`)
+     SUPABASE_URL=your_supabase_url
+     SUPABASE_KEY=your_supabase_anon_key
 
      # OpenRouter (optional headers for request attribution)
-     OPENROUTER_HTTP_REFERER=http://localhost:4321
+     OPENROUTER_HTTP_REFERER=http://localhost:3000
      OPENROUTER_X_TITLE=MindAgora
      ```
 
 6. **Run the development server**
+
    ```bash
    npm run dev
    ```
 
 7. **Open your browser**
-   - Navigate to `http://localhost:3000` (default Astro port)
+   - Navigate to `http://localhost:3000` (port configured in `astro.config.mjs`)
 
 ### First-Time User Setup
 
@@ -146,24 +156,31 @@ After launching the application:
 - `npm run lint` - Run ESLint to check for code issues
 - `npm run lint:fix` - Run ESLint and automatically fix issues
 - `npm run format` - Format code with Prettier
+- `npm test` - Run unit tests (Vitest)
+- `npm run test:watch` - Run unit tests in watch mode
+- `npx supabase start` / `npx supabase stop` - Start / stop the local Supabase stack (Docker)
+- `npx supabase db reset` - Rebuild the local database from `supabase/migrations/`
 
 ## Project Scope
 
 ### MVP Features (In Development)
 
 #### Authentication & User Management
+
 - User registration with email verification (disabled in local dev, enabled in production)
 - Login/logout functionality
 - Guided onboarding for new users
 - Account settings page
 
 #### OpenRouter API Key Management
+
 - Secure storage of API keys in Supabase
 - Masked input with show/hide toggle
 - API key validation with timeout handling
 - API responses include `Cache-Control: no-store` for sensitive data
 
 #### AI Participants Management
+
 - Create AI participants with unique aliases (max 30 characters)
 - Select from available models via OpenRouter API
 - Delete participants (hard delete)
@@ -172,6 +189,7 @@ After launching the application:
 - Deleted participant messages preserved as "(Deleted Participant)"
 
 #### Conversations Management
+
 - List conversations sorted by last updated
 - Create new conversations
 - Edit conversation titles inline
@@ -181,6 +199,7 @@ After launching the application:
 - Relative timestamps
 
 #### Multi-Model Chat
+
 - Stack layout for all messages
 - Visual distinction between user and AI messages
 - Full conversation context sent to AI models
@@ -191,6 +210,7 @@ After launching the application:
 - Absolute timestamps for each message
 
 #### Error Handling
+
 - API timeout handling
 - Invalid/expired key detection
 - Rate limit notifications
@@ -200,6 +220,7 @@ After launching the application:
 ### Out of Scope for MVP
 
 **Features:**
+
 - Dynamic participant management during active conversations
 - Editing AI participants after creation
 - Editing sent messages
@@ -218,6 +239,7 @@ After launching the application:
 - Real-time collaboration
 
 **Technical:**
+
 - Message pagination/lazy loading
 - Smart participant sorting
 - Live relative time updates
@@ -255,4 +277,3 @@ MIT
 **Need Help?**
 
 For questions, issues, or feature requests, please open an issue on GitHub.
-
