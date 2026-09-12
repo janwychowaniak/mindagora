@@ -83,3 +83,19 @@ dependencies._
   clears them).
 - **Not here:** API contract testing (the smoke suite), visual comparisons (`toHaveScreenshot`), other browsers,
   parallel workers on the shared account.
+
+## CI (GitHub Actions)
+
+- **`pull-request.yml`** runs on every pull request to `master` (and by hand): `lint` (`npm run lint`, `npm run check`)
+  → `unit` (`npm run test:coverage`, coverage artifact) ∥ `build` (`npm run build`) ∥ `e2e` → `status-comment`.
+  The E2E job starts the same local Supabase stack as a developer machine (`npx supabase start -x …`, the CLI is a
+  devDependency, Docker is on the runner), writes `.env.test` from `npx supabase status -o env`, installs Chromium with
+  `--with-deps` (apt is fine there) and uploads `playwright-report/`. The only secret is `E2E_OPENROUTER_KEY`; without
+  it the OpenRouter scenarios skip themselves.
+- **Work through pull requests.** Changes go on a branch and reach `master` through a PR; a PR is merged only green.
+  Merge with a local fast-forward (`git merge --ff-only` + push) so commit hashes stay what the maintainer's inventory
+  cites — never squash or rebase-merge.
+- **Actions:** pin to major versions and check the latest major before adding one (`gh api repos/<owner>/<repo>/releases/latest`);
+  shared steps live in `.github/actions/node-setup`. `permissions:` is set per job (least privilege), never in the
+  repository settings. `gitleaks.yml` stays a separate workflow (it also runs on a schedule).
+- **Local equivalents:** `npm run lint && npm run check && npm test && npm run build && npm run test:e2e`.

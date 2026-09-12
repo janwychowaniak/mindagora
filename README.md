@@ -1,5 +1,8 @@
 # MindAgora
 
+[![pull-request](https://github.com/janwychowaniak/mindagora/actions/workflows/pull-request.yml/badge.svg)](https://github.com/janwychowaniak/mindagora/actions/workflows/pull-request.yml)
+[![gitleaks](https://github.com/janwychowaniak/mindagora/actions/workflows/gitleaks.yml/badge.svg)](https://github.com/janwychowaniak/mindagora/actions/workflows/gitleaks.yml)
+
 A web application for conducting conversations with multiple AI models simultaneously in a unified chat interface.
 
 ## Table of Contents
@@ -72,8 +75,9 @@ MindAgora is designed for users who:
 
 ### CI/CD & Hosting
 
-- **GitHub Actions** - CI/CD pipelines
-- **DigitalOcean** - Application hosting via Docker
+- **GitHub Actions** - `pull-request.yml` on every PR to `master`: lint and type check, unit tests with coverage,
+  E2E tests on a Supabase stack started in the runner, production build, and a status comment on the PR
+- **DigitalOcean** - Application hosting via Docker (planned)
 
 ### Testing
 
@@ -157,6 +161,7 @@ After launching the application:
 - `npm run astro` - Run Astro CLI commands
 - `npm run lint` - Run ESLint to check for code issues
 - `npm run lint:fix` - Run ESLint and automatically fix issues
+- `npm run check` - Type check the project with `astro check`
 - `npm run format` - Format code with Prettier
 - `npm test` - Run the unit tests once (Vitest)
 - `npm run test:watch` - Run unit tests in watch mode
