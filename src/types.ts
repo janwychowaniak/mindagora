@@ -40,6 +40,36 @@ export interface ApiSuccessResponseDTO {
 }
 
 // =============================================================================
+// AUTH (browser session, decision E3 2026-09-12)
+// =============================================================================
+// Supabase Auth owns the accounts (auth.users); these types only expose what
+// the sign-in and sign-up forms exchange with /api/auth/*.
+
+export interface AuthUserDTO {
+  id: string;
+  email: string;
+}
+
+// Command for POST /api/auth/login and POST /api/auth/register
+export interface AuthCredentialsCommand {
+  email: string;
+  password: string;
+}
+
+// Response for POST /api/auth/login
+export interface LoginResponseDTO {
+  user: AuthUserDTO;
+}
+
+// Response for POST /api/auth/register.
+// `confirmation_required` is true when Supabase opened no session because the
+// email address must be confirmed first (production); false in local dev.
+export interface RegisterResponseDTO {
+  user: AuthUserDTO | null;
+  confirmation_required: boolean;
+}
+
+// =============================================================================
 // USER SETTINGS
 // =============================================================================
 
