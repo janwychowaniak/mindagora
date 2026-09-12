@@ -63,6 +63,8 @@ _Starter recommendations from the 10x-astro-starter rules, carried over verbatim
 - Consistency within a file beats a global rule.
 - Endpoint by endpoint, reviewed. Never "generate the whole API in one prompt".
 - Real integration over mocks where a mock would double the work (OpenRouter is called for real).
+- New logic with a pure seam ships with its unit test in the same commit (rules: `.claude/rules/testing.md`); endpoint
+  changes rerun the smoke suite. Unit tests never touch the network or the database.
 - Security first: RLS from day one; `SUPABASE_SERVICE_ROLE_KEY` is never used in user-facing code.
 - One decision = one commit. Commit messages in English, imperative, with the reason in the body.
 - Host safety: no action that touches the host's system configuration; ask before installing anything.
@@ -78,5 +80,5 @@ component/hook tests (only the OpenRouter service is unit-tested), E2E tests, CI
 
 ## Rules
 
-Detailed, path-scoped rules live in `.claude/rules/` (api, supabase, astro, react, frontend).
+Detailed, path-scoped rules live in `.claude/rules/` (api, supabase, astro, react, frontend, testing).
 Read the matching one before touching those files.
