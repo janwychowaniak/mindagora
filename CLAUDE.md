@@ -12,8 +12,8 @@ the context as an "optimisation" — that would be a product decision, not a tec
 ## Stack
 
 Astro 5 (SSR, Node adapter, port 3000) · React 19 islands · TypeScript 5 · Tailwind 4 · shadcn/ui
-(new-york, neutral) · Supabase (PostgreSQL 17, Auth via `@supabase/ssr` cookies, RLS) · OpenRouter API · Vitest · Playwright (planned) ·
-GitHub Actions (planned) · Node 24 (`.nvmrc`) · Supabase CLI as a devDependency (`npx supabase`).
+(new-york, neutral) · Supabase (PostgreSQL 17, Auth via `@supabase/ssr` cookies, RLS) · OpenRouter API · Vitest · Playwright ·
+GitHub Actions · Docker (image on GHCR) · Node 24 (`.nvmrc`) · Supabase CLI as a devDependency (`npx supabase`).
 
 ## Layout
 
@@ -35,6 +35,7 @@ GitHub Actions (planned) · Node 24 (`.nvmrc`) · Supabase CLI as a devDependenc
 - `.github/workflows/` — `pull-request.yml` (CI on PRs), `master.yml` (lint, unit tests, container image to GHCR on every
   push to `master`) and `gitleaks.yml`; `.github/actions/node-setup` is the shared Node + `npm ci` step
 - `.githooks/` — gitleaks + lint-staged hooks; after cloning run `git config core.hooksPath .githooks`
+- `Dockerfile` + `.dockerignore` — the production image (two stages on `node:24-alpine`, see README „Container Image”)
 
 ## Commands
 
