@@ -1,0 +1,15 @@
+---
+import RegisterForm from "../components/auth/RegisterForm.tsx";
+import Layout from "../layouts/Layout.astro";
+
+// Public page; a visitor who already has a session belongs in the application.
+if (Astro.locals.user) {
+  return Astro.redirect("/");
+}
+---
+
+<Layout title="Register - MindAgora">
+  <div class="mx-auto mt-12 w-full max-w-sm">
+    <RegisterForm client:load />
+  </div>
+</Layout>
