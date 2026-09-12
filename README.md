@@ -12,6 +12,7 @@ A web application for conducting conversations with multiple AI models simultane
 - [Getting Started Locally](#getting-started-locally)
 - [Available Scripts](#available-scripts)
 - [Container Image](#container-image)
+- [Deployment & Releases](#deployment--releases)
 - [Project Scope](#project-scope)
 - [Project Status](#project-status)
 - [License](#license)
@@ -136,6 +137,9 @@ MindAgora is designed for users who:
      # OpenRouter (optional headers for request attribution)
      OPENROUTER_HTTP_REFERER=http://localhost:3000
      OPENROUTER_X_TITLE=MindAgora
+
+     # Public origin of a deployment (optional; the dev server uses the request origin)
+     SITE_URL=http://localhost:3000
      ```
 
 6. **Run the development server**
@@ -191,6 +195,27 @@ docker run --rm --network host \
   mindagora:local
 # then open http://localhost:3200
 ```
+
+## Deployment & Releases
+
+The app runs at **https://mindagora.ai**: Railway (EU West) runs the GHCR image, Cloudflare serves DNS and TLS for the
+domain (`www` redirects to the root), and a Supabase cloud project in the EU holds the data.
+
+- **Deployment** happens on every push to `master`: `.github/workflows/master.yml` lints, type-checks, runs the unit
+  tests and pushes the image to GHCR (`ghcr.io/janwychowaniak/mindagora:latest` and `sha-<commit>`).
+- **Release** is the `deploy` job behind the GitHub environment `production`: it waits for the required reviewer, then
+  `railway redeploy` pulls the new `latest` digest and restarts the service (about a minute; Railway checks `/login`
+  before switching traffic). Approve or reject a pending deployment promptly: it holds the workflow's concurrency group.
+- **Configuration** lives only in the Railway service variables (`SUPABASE_URL`, `SUPABASE_KEY`, `SITE_URL`,
+  `OPENROUTER_HTTP_REFERER`, `OPENROUTER_X_TITLE`; `PORT` comes from the image) and in the environment secret
+  `RAILWAY_TOKEN`. Nothing is baked into the image and nothing is committed.
+- **Database changes** reach the cloud project from a maintainer's machine with `npx supabase link --project-ref <ref>`
+  and `npx supabase db push`, before the release that needs them.
+- **Plans:** Railway Hobby keeps the service always on (the free plan stops it once the monthly credit is used up).
+  The Supabase free tier pauses a project after a week without activity; it is resumed from the Supabase dashboard.
+- **Known limitation:** each user's OpenRouter key is stored in the database in plain text, protected by row-level
+  security only, so the maintainer could read it. Use a key with a spending limit and delete it in OpenRouter when you
+  stop using MindAgora. Encryption at rest is planned.
 
 ## Project Scope
 
@@ -283,9 +308,11 @@ docker run --rm --network host \
 
 ## Project Status
 
-🚧 **MVP in Development**
+🟢 **MVP live at [mindagora.ai](https://mindagora.ai)**
 
-MindAgora is currently in active development for the MVP release. Core features are being implemented according to the product requirements document.
+The MVP scope above is implemented, tested (unit, integration smoke, E2E) and deployed; see
+[Deployment & Releases](#deployment--releases). MindAgora is a course project (10xDevs 2.0) that keeps evolving as a
+portfolio piece and as material for the next course editions.
 
 ### Success Metrics
 

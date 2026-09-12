@@ -93,6 +93,10 @@ dependencies._
   devDependency, Docker is on the runner), writes `.env.test` from `npx supabase status -o env`, installs Chromium with
   `--with-deps` (apt is fine there) and uploads `playwright-report/`. The only secret is `E2E_OPENROUTER_KEY`; without
   it the OpenRouter scenarios skip themselves.
+- **`master.yml`** runs on every push to `master`: `lint` → `unit` (`npm test`) → `image` (buildx, GHCR, tags
+  `sha-<commit>` and `latest`, GHA cache) → `deploy` (environment `production` with a required reviewer;
+  `railway redeploy` with the project token from the environment secrets). E2E is not repeated there: `master` only
+  receives fast-forwarded PRs that passed `pull-request.yml`. A pending approval holds the `master` concurrency group.
 - **Work through pull requests.** Changes go on a branch and reach `master` through a PR; a PR is merged only green.
   Merge with a local fast-forward (`git merge --ff-only` + push) so commit hashes stay what the maintainer's inventory
   cites — never squash or rebase-merge.

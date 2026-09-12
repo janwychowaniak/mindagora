@@ -86,8 +86,9 @@ non-browser clients, the full MVP UI (onboarding, settings, conversation list, c
 Testing Library for the helpers, onboarding logic, HTTP client, view hooks and the chat / title-editor components
 (the test plan lives in the maintainer's workspace), and Playwright E2E scenarios (auth, onboarding, conversation, list)
 on the local Supabase stack with real OpenRouter calls, and CI on pull requests (`.github/workflows/pull-request.yml`:
-lint + type check, unit tests, E2E on a Supabase stack in the runner, production build, PR status comment). Not yet:
-deployment. Major upgrades
+lint + type check, unit tests, E2E on a Supabase stack in the runner, production build, PR status comment). Deployed at https://mindagora.ai
+(Railway from the GHCR image, `master.yml` with the `production` environment gate, Supabase cloud project; see README
+„Deployment & Releases”). Major upgrades
 (Astro 7, Zod 4, Vitest 5) are deliberately deferred.
 
 ## Rules
