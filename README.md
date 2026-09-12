@@ -11,6 +11,7 @@ A web application for conducting conversations with multiple AI models simultane
 - [Tech Stack](#tech-stack)
 - [Getting Started Locally](#getting-started-locally)
 - [Available Scripts](#available-scripts)
+- [Container Image](#container-image)
 - [Project Scope](#project-scope)
 - [Project Status](#project-status)
 - [License](#license)
@@ -171,6 +172,23 @@ After launching the application:
 - `npm run dev:e2e` - Dev server with `.env.test` (started by Playwright automatically)
 - `npx supabase start` / `npx supabase stop` - Start / stop the local Supabase stack (Docker)
 - `npx supabase db reset` - Rebuild the local database from `supabase/migrations/`
+
+## Container Image
+
+`Dockerfile` builds the production server: two stages on `node:24-alpine`, production dependencies only, a non-root
+user and a health check on `/login`. Configuration is read from the environment when the container runs (`astro:env`);
+nothing is baked into the image. To build and run it locally against the local Supabase stack:
+
+```bash
+docker build -t mindagora:local .
+docker run --rm --network host \
+  -e PORT=3200 \
+  -e SUPABASE_URL=http://127.0.0.1:54321 \
+  -e SUPABASE_KEY=<anon key from "npx supabase status"> \
+  -e OPENROUTER_X_TITLE=MindAgora \
+  mindagora:local
+# then open http://localhost:3200
+```
 
 ## Project Scope
 
