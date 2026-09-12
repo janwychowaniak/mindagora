@@ -39,3 +39,15 @@ Radio Group, ScrollArea, Select, Separator, Sheet, Skeleton, Slider, Switch, Tab
 Toggle, Tooltip.
 
 Styling: the "new-york" style with the "neutral" base colour and CSS variables for theming, as configured in `components.json`.
+
+## Project notes (deliberate deviations and clarifications)
+
+- The React Compiler ESLint rule (`react-compiler/react-compiler`) is on. The starter's manual memoisation advice
+  (`React.memo`, `useCallback`, `useMemo`) is usually unnecessary here: write plain code and let the compiler decide.
+  The rule also rejects mutating a ref received as a parameter and writing to globals inside a hook, which is why
+  `useAutoScroll` owns its ref and `document.title` is set in an effect of the view.
+- Islands: one per view in `src/components/{auth,settings,onboarding,conversations,chat,shared}/`, state kept local,
+  one hook per view in `src/components/hooks/`; HTTP only through `src/lib/api-client.ts` (see the frontend rules).
+- `autoFocus` is banned by jsx-a11y; focus programmatically in an effect after the user's action (see `InlineTitleEditor`).
+- shadcn CLI today emits `import { cn } from "cn"` and pulls that npm package: switch the import back to
+  `@/lib/utils` and remove the package; add components with `--overwrite` when one re-requests an existing file.
