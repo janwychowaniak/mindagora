@@ -21,6 +21,8 @@ export default defineConfig({
   use: {
     baseURL,
     trace: "on-first-retry",
+    // Watching a run: E2E_SLOW_MO=500 npx playwright test --headed
+    launchOptions: { slowMo: Number(process.env.E2E_SLOW_MO ?? 0) },
   },
   projects: [
     { name: "setup", testMatch: /auth\.setup\.ts/, teardown: "teardown" },

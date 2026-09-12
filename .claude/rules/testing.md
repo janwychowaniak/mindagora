@@ -62,7 +62,8 @@ dependencies._
 - **Where:** `e2e/` — `*.spec.ts` scenarios, `page-objects/` one class per page (plus `AppShell` and the shared
   `ParticipantsPanel`), `auth.setup.ts` / `global.teardown.ts` projects, `env.ts` for `.env.test` access,
   `hydration.ts`. Config in `playwright.config.ts`; `.env.test` (ignored) from `.env.test.example`.
-- **Run:** `npm run test:e2e` (Chromium only, one worker); `npm run test:e2e:ui` to watch. The web server is
+- **Run:** `npm run test:e2e` (Chromium only, one worker); `npm run test:e2e:ui` to watch, or `--headed` with
+  `E2E_SLOW_MO=500` to slow the browser down. The web server is
   `npm run dev:e2e` (`astro dev --mode test`) against the LOCAL Supabase stack — start it first. A running dev
   server on port 3000 is reused.
 - **Account:** the setup project registers or signs in `E2E_USERNAME`, stores the OpenRouter key when
