@@ -11,14 +11,5 @@ declare global {
   }
 }
 
-interface ImportMetaEnv {
-  readonly SUPABASE_URL: string;
-  readonly SUPABASE_KEY: string;
-  // Optional OpenRouter attribution headers (see openrouter.service.ts)
-  readonly OPENROUTER_HTTP_REFERER?: string;
-  readonly OPENROUTER_X_TITLE?: string;
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
-}
+// Runtime configuration is declared in `astro.config.mjs` (`env.schema`) and imported from `astro:env/server`;
+// its types are generated into `.astro/` by `astro sync` (run by `astro check`, `astro dev` and `astro build`).

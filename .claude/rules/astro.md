@@ -29,4 +29,7 @@ _Starter recommendations from the 10x-astro-starter rules, carried over verbatim
 
 - Output is `server` with the Node adapter (standalone); the dev server runs on port 3000 (`astro.config.mjs`).
 - No content collections, no image optimisation and no sitemap are used yet (an app behind a login) — the recommendations above still apply the day such content appears.
-- Environment variables are declared in `src/env.d.ts`.
+- Runtime configuration goes through `astro:env`, not `import.meta.env`: the schema lives in `astro.config.mjs` (`env.schema`,
+  every variable a server secret), modules import the values from `astro:env/server`, and the Node adapter reads them from
+  the process environment when the server starts. Vite inlines private `import.meta.env` values at build time, which
+  a container image built once cannot afford (lesson 3x6, 2026-09-12). `import.meta.env.PROD` stays: a build-time flag by design.

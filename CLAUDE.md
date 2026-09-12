@@ -43,7 +43,8 @@ GitHub Actions (planned) · Node 24 (`.nvmrc`) · Supabase CLI as a devDependenc
 `.env.test`) · `npx supabase start|stop|status` · `npx supabase db reset` (rebuild the local DB from migrations) ·
 `npx supabase gen types typescript --local > src/db/database.types.ts`
 
-Environment: `SUPABASE_URL`, `SUPABASE_KEY` (anon), optional `OPENROUTER_HTTP_REFERER`, `OPENROUTER_X_TITLE`.
+Environment: `SUPABASE_URL`, `SUPABASE_KEY` (anon), optional `OPENROUTER_HTTP_REFERER`, `OPENROUTER_X_TITLE` — declared in
+`astro.config.mjs` (`env.schema`), imported from `astro:env/server`, read from the process environment at runtime.
 The per-user OpenRouter key is stored in `user_settings`, never in env.
 
 ## Coding practices

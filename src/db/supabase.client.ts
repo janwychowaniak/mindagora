@@ -1,14 +1,12 @@
 import type { AstroCookies } from "astro";
+import { SUPABASE_KEY, SUPABASE_URL } from "astro:env/server";
 import { createServerClient, parseCookieHeader, type CookieOptionsWithName } from "@supabase/ssr";
 import { createClient, type SupabaseClient as SupabaseJsClient, type User } from "@supabase/supabase-js";
 
 import type { Database } from "./database.types.ts";
 
-const supabaseUrl = import.meta.env.SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.SUPABASE_KEY;
-
 // Anonymous client without a session. The middleware uses it to verify Bearer tokens.
-export const supabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey);
+export const supabaseClient = createClient<Database>(SUPABASE_URL, SUPABASE_KEY);
 
 export type SupabaseClient = SupabaseJsClient<Database>;
 export type SupabaseUser = User;
@@ -27,7 +25,7 @@ export const cookieOptions: CookieOptionsWithName = {
 // session lives only in cookies, and token refreshes are written back to the response through `setAll`.
 // Only `getAll`/`setAll` are implemented (never `get`/`set`/`remove`), as @supabase/ssr requires.
 export const createSupabaseServerInstance = (context: { headers: Headers; cookies: AstroCookies }): SupabaseClient =>
-  createServerClient<Database>(supabaseUrl, supabaseAnonKey, {
+  createServerClient<Database>(SUPABASE_URL, SUPABASE_KEY, {
     cookieOptions,
     cookies: {
       getAll() {

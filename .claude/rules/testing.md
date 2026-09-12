@@ -44,8 +44,9 @@ dependencies._
   `ApiResult` values. `window.location` and `window.history` are stubbed, never navigated. Randomness goes through
   `vi.spyOn(Math, "random")`, time through `vi.useFakeTimers()` or an injected `now`; restore both in `afterEach`
   (`vi.useRealTimers()`, `vi.unstubAllGlobals()`, `vi.restoreAllMocks()`).
-- **No Supabase in unit tests.** Do not import `src/db/supabase.client.ts` (it creates the client at import time and
-  needs env). Services that compose other services are tested with `vi.mock` of those services; queries are covered by
+- **No Supabase in unit tests.** Do not import `src/db/supabase.client.ts` (it creates the client at import time).
+  `astro:env/server` is mocked with placeholders in `src/test/setup.ts` for every test file, so modules that import
+  it load without an environment; the suite must keep passing without `.env`. Services that compose other services are tested with `vi.mock` of those services; queries are covered by
   the smoke suite.
 - **Components:** Testing Library with `@testing-library/user-event`; query by role, label or text first, then by
   `data-testid` (kebab-case names from `.claude/rules/frontend.md`). Never assert on class names or DOM structure.

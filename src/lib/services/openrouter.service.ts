@@ -1,3 +1,4 @@
+import { OPENROUTER_HTTP_REFERER, OPENROUTER_X_TITLE } from "astro:env/server";
 import { z } from "zod";
 
 import type {
@@ -10,9 +11,6 @@ import type {
 export const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 export const OPENROUTER_VALIDATE_KEY_TIMEOUT_MS = 10_000;
 export const OPENROUTER_DEFAULT_TIMEOUT_MS = 30_000;
-
-const openRouterHttpReferer = import.meta.env.OPENROUTER_HTTP_REFERER;
-const openRouterTitle = import.meta.env.OPENROUTER_X_TITLE;
 
 const apiKeySchema = z.string().min(1);
 
@@ -108,12 +106,12 @@ const buildHeaders = (apiKey: string, includeJson: boolean): HeadersInit => {
     headers["Content-Type"] = "application/json";
   }
 
-  if (openRouterHttpReferer) {
-    headers["HTTP-Referer"] = openRouterHttpReferer;
+  if (OPENROUTER_HTTP_REFERER) {
+    headers["HTTP-Referer"] = OPENROUTER_HTTP_REFERER;
   }
 
-  if (openRouterTitle) {
-    headers["X-Title"] = openRouterTitle;
+  if (OPENROUTER_X_TITLE) {
+    headers["X-Title"] = OPENROUTER_X_TITLE;
   }
 
   return headers;

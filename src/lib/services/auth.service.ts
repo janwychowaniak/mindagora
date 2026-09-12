@@ -1,3 +1,4 @@
+import { SUPABASE_KEY, SUPABASE_URL } from "astro:env/server";
 import { createClient, type AuthError, type Session } from "@supabase/supabase-js";
 import { z } from "zod";
 
@@ -5,9 +6,6 @@ import type { SupabaseClient, SupabaseUser } from "../../db/supabase.client.ts";
 import type { Database } from "../../db/database.types.ts";
 
 const bearerHeaderSchema = z.string().regex(/^Bearer\s+\S+$/i);
-
-const supabaseUrl = import.meta.env.SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.SUPABASE_KEY;
 
 export const extractBearerToken = (request: Request): string | null => {
   const authHeader = request.headers.get("Authorization");
@@ -51,12 +49,9 @@ export const getAuthenticatedUser = async ({
   return { user: data.user ?? null, error: null };
 };
 
-export const createAuthedSupabaseClient = (token: string): SupabaseClient => {
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error("Supabase environment variables are not configured.");
-  }
-
-  return createClient<Database>(supabaseUrl, supabaseAnonKey, {
+// `astro:env` guarantees both values: a missing one fails the first request with a clear EnvInvalidVariables error.
+export const createAuthedSupabaseClient = (token: string): SupabaseClient =>
+  createClient<Database>(SUPABASE_URL, SUPABASE_KEY, {
     global: {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -67,7 +62,6 @@ export const createAuthedSupabaseClient = (token: string): SupabaseClient => {
       autoRefreshToken: false,
     },
   });
-};
 
 // -----------------------------------------------------------------------------
 // Browser session (decision E3, 2026-09-12): the functions below run on the
