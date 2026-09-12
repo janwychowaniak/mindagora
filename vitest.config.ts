@@ -6,6 +6,8 @@ import { getViteConfig } from "astro/config";
 export default getViteConfig({
   test: {
     environment: "node",
+    // Date helpers format in the process time zone; pin it so day boundaries are the same on every machine.
+    env: { TZ: "UTC" },
     include: ["src/**/*.test.{ts,tsx}"],
     setupFiles: ["src/test/setup.ts"],
     coverage: {
