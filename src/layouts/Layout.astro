@@ -10,6 +10,12 @@ interface Props {
 
 const { title = "MindAgora", user = null } = Astro.props;
 const HELP_URL = "https://github.com/janwychowaniak/mindagora#readme";
+
+const pathname = Astro.url.pathname;
+const navLinks = [
+  { href: "/", label: "Conversations", active: pathname === "/" || pathname.startsWith("/conversations") },
+  { href: "/settings", label: "Settings", active: pathname.startsWith("/settings") },
+];
 ---
 
 <!doctype html>
@@ -28,6 +34,18 @@ const HELP_URL = "https://github.com/janwychowaniak/mindagora#readme";
         {
           user && (
             <nav class="flex items-center gap-4 text-sm" aria-label="Main">
+              {navLinks.map((link) => (
+                <a
+                  href={link.href}
+                  aria-current={link.active ? "page" : undefined}
+                  class:list={[
+                    "transition-colors hover:text-foreground",
+                    link.active ? "font-medium text-foreground" : "text-muted-foreground",
+                  ]}
+                >
+                  {link.label}
+                </a>
+              ))}
               <a
                 href={HELP_URL}
                 target="_blank"
