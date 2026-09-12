@@ -1,34 +1,16 @@
 ---
+import ConversationListView from "../components/conversations/ConversationListView.tsx";
 import Layout from "../layouts/Layout.astro";
-import { getOnboardingStatus, resolveOnboardingStep } from "../lib/services/onboarding.service.ts";
+import { onboardingGate } from "../lib/onboarding-gate.ts";
 
-// The middleware redirects anonymous visitors to /login, so `user` is always present here.
-// Onboarding gate (UI plan ap7 §4): an incomplete setup lands on /onboarding.
-const user = Astro.locals.user;
-const email = user?.email ?? "";
-
-const status = user ? await getOnboardingStatus({ supabase: Astro.locals.supabase, userId: user.id }) : null;
-if (!status || status.error || !status.data) {
-  // eslint-disable-next-line no-console
-  console.error("Onboarding status lookup failed", {
-    route: "/",
-    status: 503,
-    supabase_error_code: status?.error?.code,
-  });
-  return new Response("Could not load your account state. Please try again later.", { status: 503 });
+// Behind the session (middleware) and the onboarding gate (UI plan ap7 §4).
+const gate = await onboardingGate({ locals: Astro.locals, route: "/" });
+if (gate) {
+  return "redirect" in gate ? Astro.redirect(gate.redirect) : gate.response;
 }
-
-if (resolveOnboardingStep(status.data) !== "complete") {
-  return Astro.redirect("/onboarding");
-}
+const email = Astro.locals.user?.email ?? "";
 ---
 
-<Layout user={{ email }}>
-  <section class="space-y-3">
-    <h1 class="text-2xl font-semibold tracking-tight">Welcome to MindAgora</h1>
-    <p class="text-muted-foreground">
-      Signed in as <span class="text-foreground">{email}</span>.
-    </p>
-    <p class="text-sm text-muted-foreground">Your conversations will appear here.</p>
-  </section>
+<Layout title="Conversations - MindAgora" user={{ email }}>
+  <ConversationListView client:load />
 </Layout>
