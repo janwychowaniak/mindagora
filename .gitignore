@@ -30,3 +30,8 @@ pnpm-debug.log*
 
 .env.test
 coverage/*
+
+# Playwright
+playwright-report/
+test-results/
+playwright/.auth/
