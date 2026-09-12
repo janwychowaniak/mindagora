@@ -1,0 +1,13 @@
+---
+import SettingsView from "../components/settings/SettingsView.tsx";
+import Layout from "../layouts/Layout.astro";
+
+// Behind the session (middleware) and always reachable: this is where a missing API key gets fixed,
+// so there is no onboarding gate here (UI plan ap7 §4).
+const email = Astro.locals.user?.email ?? "";
+const notice = Astro.url.searchParams.get("notice") === "api-key" ? "api-key" : null;
+---
+
+<Layout title="Settings - MindAgora" user={{ email }}>
+  <SettingsView client:load email={email} notice={notice} />
+</Layout>
