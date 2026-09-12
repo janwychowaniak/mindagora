@@ -31,12 +31,13 @@ GitHub Actions (planned) · Node 24 (`.nvmrc`) · Supabase CLI as a devDependenc
   is shadcn/ui
 - `src/lib/` — services and helpers; `src/assets/` — static internal assets; `public/` — public assets
 - `supabase/migrations/` — nine atomic migrations (enums → tables → indexes → triggers → RLS)
+- `e2e/` — Playwright scenarios and page objects (`playwright.config.ts`, `.env.test` from `.env.test.example`)
 - `.githooks/` — gitleaks + lint-staged hooks; after cloning run `git config core.hooksPath .githooks`
 
 ## Commands
 
 `npm run dev` · `npm run build` · `npm run lint` / `lint:fix` · `npm test` (single run) / `test:watch` /
-`test:coverage` · `npx supabase start|stop|status` · `npx supabase db reset` (rebuild the local DB from migrations) ·
+`test:coverage` · `npm run test:e2e` (Playwright, local Supabase, `.env.test`) · `npx supabase start|stop|status` · `npx supabase db reset` (rebuild the local DB from migrations) ·
 `npx supabase gen types typescript --local > src/db/database.types.ts`
 
 Environment: `SUPABASE_URL`, `SUPABASE_KEY` (anon), optional `OPENROUTER_HTTP_REFERER`, `OPENROUTER_X_TITLE`.
@@ -76,7 +77,8 @@ Done: schema + RLS, DTOs, OpenRouter service (unit-tested), 12 REST endpoints + 
 curl smoke suite kept in the maintainer's workspace outside this repo), cookie session with Bearer kept for
 non-browser clients, the full MVP UI (onboarding, settings, conversation list, chat), and unit tests with Vitest +
 Testing Library for the helpers, onboarding logic, HTTP client, view hooks and the chat / title-editor components
-(the test plan lives in the maintainer's workspace). Not yet: E2E tests, CI/CD, deployment. Major upgrades
+(the test plan lives in the maintainer's workspace), and Playwright E2E scenarios (auth, onboarding, conversation, list)
+on the local Supabase stack with real OpenRouter calls. Not yet: CI/CD, deployment. Major upgrades
 (Astro 7, Zod 4, Vitest 5) are deliberately deferred.
 
 ## Rules

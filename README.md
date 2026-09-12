@@ -81,7 +81,8 @@ MindAgora is designed for users who:
 - **React Testing Library** + **user-event** - Hook and component tests
 - **curl smoke suite** - Integration tests of every endpoint against the local Supabase stack and the real
   OpenRouter API, kept in the maintainer's workspace outside this repo
-- **Playwright** - End-to-end testing (planned)
+- **Playwright** - End-to-end scenarios in `e2e/` (Chromium, page objects, the local Supabase stack, real OpenRouter
+  calls when `E2E_OPENROUTER_KEY` is set in `.env.test`)
 
 ## Getting Started Locally
 
@@ -160,6 +161,9 @@ After launching the application:
 - `npm test` - Run the unit tests once (Vitest)
 - `npm run test:watch` - Run unit tests in watch mode
 - `npm run test:coverage` - Run unit tests with a V8 coverage report
+- `npm run test:e2e` - Run the Playwright E2E suite (`npx supabase start` first; copy `.env.test.example` to `.env.test`)
+- `npm run test:e2e:ui` - Playwright UI mode
+- `npm run dev:e2e` - Dev server with `.env.test` (started by Playwright automatically)
 - `npx supabase start` / `npx supabase stop` - Start / stop the local Supabase stack (Docker)
 - `npx supabase db reset` - Rebuild the local database from `supabase/migrations/`
 

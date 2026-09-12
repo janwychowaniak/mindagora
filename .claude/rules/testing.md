@@ -56,3 +56,29 @@ dependencies._
   behavioural consequence. Delete a generated test that has no business meaning rather than keep it green.
 - **New logic with a pure seam ships with its test in the same commit.** Endpoint changes additionally rerun the
   smoke suite before the commit.
+
+## E2E (Playwright)
+
+- **Where:** `e2e/` — `*.spec.ts` scenarios, `page-objects/` one class per page (plus `AppShell` and the shared
+  `ParticipantsPanel`), `auth.setup.ts` / `global.teardown.ts` projects, `env.ts` for `.env.test` access,
+  `hydration.ts`. Config in `playwright.config.ts`; `.env.test` (ignored) from `.env.test.example`.
+- **Run:** `npm run test:e2e` (Chromium only, one worker); `npm run test:e2e:ui` to watch. The web server is
+  `npm run dev:e2e` (`astro dev --mode test`) against the LOCAL Supabase stack — start it first. A running dev
+  server on port 3000 is reused.
+- **Account:** the setup project registers or signs in `E2E_USERNAME`, stores the OpenRouter key when
+  `E2E_OPENROUTER_KEY` is set, adds "E2E Alpha" and "E2E Beta", and saves the session as `storageState`. Scenarios
+  that must start as a guest use `test.use({ storageState: GUEST_STATE })`. Never log the shared account out from
+  a test: Supabase signs out every session, including the saved one — use a throwaway account (see `auth.spec.ts`).
+- **OpenRouter:** real calls (`openai/gpt-4o-mini`), one or two per scenario. A scenario that reaches OpenRouter
+  calls `requireOpenRouterKey()` in `beforeEach` and is skipped without the key; the suite must stay green without it.
+- **Hydration:** every page-object action starts with `waitForHydration(page)` (no `astro-island[ssr]` left). Before
+  that a form submits natively and React resets controlled inputs — interacting earlier is the classic flaky test.
+- **Selectors:** `getByTestId` with the kebab-case ids from `.claude/rules/frontend.md`; roles and labels where
+  the id would be redundant. Filter list items by exact text (`getByText(title, { exact: true })`), and remember
+  that the inline title editor replaces the title button while editing.
+- **Data:** unique per run (`runTag()` in aliases, e-mails and messages). The teardown deletes the shared
+  account's conversations and participants under RLS with the anon key — never the service role — and refuses
+  a non-local `SUPABASE_URL`. Throwaway accounts stay in the local `auth.users` (harmless; `npx supabase db reset`
+  clears them).
+- **Not here:** API contract testing (the smoke suite), visual comparisons (`toHaveScreenshot`), other browsers,
+  parallel workers on the shared account.
