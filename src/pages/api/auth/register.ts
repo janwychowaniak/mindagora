@@ -1,3 +1,4 @@
+import { SITE_URL } from "astro:env/server";
 import type { APIContext } from "astro";
 import type { z } from "zod";
 
@@ -64,7 +65,10 @@ export const POST = async (context: APIContext) => {
     supabase: locals.supabase,
     email: parsed.data.email,
     password: parsed.data.password,
-    emailRedirectTo: new URL("/login", request.url).toString(),
+    // The confirmation link in the sign-up e-mail comes back to this app. Production sets SITE_URL: the Node adapter
+    // builds `request.url` on `localhost` unless the host is allow-listed (Astro 5.18), so the request origin is
+    // only trustworthy on the dev server, where it stays the fallback.
+    emailRedirectTo: new URL("/login", SITE_URL ?? request.url).toString(),
   });
 
   if (error || !data) {

@@ -27,6 +27,9 @@ export default defineConfig({
       // OpenRouter attribution headers (see openrouter.service.ts); the app works without them.
       OPENROUTER_HTTP_REFERER: envField.string({ context: "server", access: "secret", optional: true }),
       OPENROUTER_X_TITLE: envField.string({ context: "server", access: "secret", optional: true }),
+      // Public origin of the deployment (https://mindagora.ai). Used where the app has to name itself in an absolute
+      // URL (the sign-up confirmation link); without it the request origin is used, which is right on the dev server.
+      SITE_URL: envField.string({ context: "server", access: "secret", optional: true, url: true }),
     },
   },
 });

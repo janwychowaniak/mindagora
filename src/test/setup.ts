@@ -9,6 +9,7 @@ vi.mock("astro:env/server", () => ({
   SUPABASE_KEY: "unit-test-anon-key",
   OPENROUTER_HTTP_REFERER: undefined,
   OPENROUTER_X_TITLE: undefined,
+  SITE_URL: undefined,
 }));
 
 // Testing Library only unmounts on its own with Vitest globals enabled; this project imports from "vitest" explicitly.
