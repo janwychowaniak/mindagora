@@ -168,7 +168,7 @@ After launching the application:
 #### Authentication & User Management
 
 - User registration with email verification (disabled in local dev, enabled in production)
-- Login/logout functionality
+- Login/logout with the session kept in httpOnly cookies (`@supabase/ssr`); the REST API also accepts `Authorization: Bearer <jwt>` for non-browser clients
 - Guided onboarding for new users
 - Account settings page
 
