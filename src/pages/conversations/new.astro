@@ -1,0 +1,16 @@
+---
+import ChatView from "../../components/chat/ChatView.tsx";
+import Layout from "../../layouts/Layout.astro";
+import { onboardingGate } from "../../lib/onboarding-gate.ts";
+
+// Draft conversation: nothing is persisted until the first successful exchange (PRD §3.5).
+const gate = await onboardingGate({ locals: Astro.locals, route: "/conversations/new" });
+if (gate) {
+  return "redirect" in gate ? Astro.redirect(gate.redirect) : gate.response;
+}
+const email = Astro.locals.user?.email ?? "";
+---
+
+<Layout title="New conversation - MindAgora" user={{ email }}>
+  <ChatView client:load conversationId={null} />
+</Layout>

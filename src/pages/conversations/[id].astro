@@ -1,0 +1,23 @@
+---
+import ChatView from "../../components/chat/ChatView.tsx";
+import Layout from "../../layouts/Layout.astro";
+import { onboardingGate } from "../../lib/onboarding-gate.ts";
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+// Only the format is checked here; existence and ownership are the API's call (404 for both, anti-enumeration).
+const id = Astro.params.id;
+if (!id || !UUID_PATTERN.test(id)) {
+  return new Response(null, { status: 404 });
+}
+
+const gate = await onboardingGate({ locals: Astro.locals, route: "/conversations/:id" });
+if (gate) {
+  return "redirect" in gate ? Astro.redirect(gate.redirect) : gate.response;
+}
+const email = Astro.locals.user?.email ?? "";
+---
+
+<Layout title="Conversation - MindAgora" user={{ email }}>
+  <ChatView client:load conversationId={id} />
+</Layout>
