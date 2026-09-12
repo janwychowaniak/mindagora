@@ -2,7 +2,8 @@
 // `requireOpenRouterKey()` and skip themselves when the key is not configured.
 import { test } from "@playwright/test";
 
-export const E2E_MODEL_ID = "openai/gpt-4o-mini";
+// The cheapest paid model on OpenRouter: the scenarios only check that a reply arrives, never what it says.
+export const E2E_MODEL_ID = "meta-llama/llama-3.2-1b-instruct";
 export const GUEST_STATE = { cookies: [], origins: [] };
 
 export const e2eAccount = () => {
