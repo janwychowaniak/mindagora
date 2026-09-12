@@ -59,6 +59,7 @@ export function LoginForm() {
               disabled={submitting}
               aria-invalid={Boolean(fieldErrors.email)}
               aria-describedby={fieldErrors.email ? "login-email-error" : undefined}
+              data-testid="login-email"
             />
             {fieldErrors.email && (
               <p id="login-email-error" className="text-sm text-destructive">
@@ -77,6 +78,7 @@ export function LoginForm() {
               disabled={submitting}
               aria-invalid={Boolean(fieldErrors.password)}
               aria-describedby={fieldErrors.password ? "login-password-error" : undefined}
+              data-testid="login-password"
             />
             {fieldErrors.password && (
               <p id="login-password-error" className="text-sm text-destructive">
@@ -85,13 +87,13 @@ export function LoginForm() {
             )}
           </div>
           {formError && (
-            <p role="alert" className="text-sm text-destructive">
+            <p role="alert" className="text-sm text-destructive" data-testid="login-error">
               {formError}
             </p>
           )}
         </CardContent>
         <CardFooter className="mt-6 flex flex-col items-stretch gap-4">
-          <Button type="submit" disabled={submitting}>
+          <Button type="submit" disabled={submitting} data-testid="login-submit">
             {submitting ? "Logging in…" : "Log in"}
           </Button>
           <p className="text-center text-sm text-muted-foreground">

@@ -31,7 +31,14 @@ export function LogoutButton() {
           {error}
         </span>
       )}
-      <Button type="button" variant="ghost" size="sm" onClick={handleLogout} disabled={pending}>
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        onClick={handleLogout}
+        disabled={pending}
+        data-testid="logout-button"
+      >
         {pending ? "Logging out…" : "Logout"}
       </Button>
     </div>

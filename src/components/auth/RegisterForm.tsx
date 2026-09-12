@@ -90,6 +90,7 @@ export function RegisterForm() {
               disabled={submitting}
               aria-invalid={Boolean(fieldErrors.email)}
               aria-describedby={fieldErrors.email ? "register-email-error" : undefined}
+              data-testid="register-email"
             />
             {fieldErrors.email && (
               <p id="register-email-error" className="text-sm text-destructive">
@@ -108,6 +109,7 @@ export function RegisterForm() {
               disabled={submitting}
               aria-invalid={Boolean(fieldErrors.password)}
               aria-describedby={fieldErrors.password ? "register-password-error" : undefined}
+              data-testid="register-password"
             />
             {fieldErrors.password && (
               <p id="register-password-error" className="text-sm text-destructive">
@@ -126,6 +128,7 @@ export function RegisterForm() {
               disabled={submitting}
               aria-invalid={Boolean(fieldErrors.confirmPassword)}
               aria-describedby={fieldErrors.confirmPassword ? "register-confirm-password-error" : undefined}
+              data-testid="register-confirm-password"
             />
             {fieldErrors.confirmPassword && (
               <p id="register-confirm-password-error" className="text-sm text-destructive">
@@ -134,13 +137,13 @@ export function RegisterForm() {
             )}
           </div>
           {formError && (
-            <p role="alert" className="text-sm text-destructive">
+            <p role="alert" className="text-sm text-destructive" data-testid="register-error">
               {formError}
             </p>
           )}
         </CardContent>
         <CardFooter className="mt-6 flex flex-col items-stretch gap-4">
-          <Button type="submit" disabled={submitting}>
+          <Button type="submit" disabled={submitting} data-testid="register-submit">
             {submitting ? "Creating account…" : "Register"}
           </Button>
           <p className="text-center text-sm text-muted-foreground">
