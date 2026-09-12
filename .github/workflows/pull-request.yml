@@ -99,7 +99,7 @@ jobs:
           script: |
             const marker = "<!-- pull-request-status -->";
             const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-            const body = `${marker}\n✅ Lint, type check, unit tests, E2E tests and the production build passed for ${context.sha.slice(0, 7)}.\n\n[Run details](${runUrl})`;
+            const body = `${marker}\n✅ Lint, type check, unit tests, E2E tests and the production build passed for ${(context.payload.pull_request?.head?.sha ?? context.sha).slice(0, 7)}.\n\n[Run details](${runUrl})`;
             const issue_number = context.issue.number;
             const { data: comments } = await github.rest.issues.listComments({ ...context.repo, issue_number });
             const existing = comments.find((comment) => comment.body?.startsWith(marker));
