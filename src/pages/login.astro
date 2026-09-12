@@ -1,0 +1,15 @@
+---
+import LoginForm from "../components/auth/LoginForm.tsx";
+import Layout from "../layouts/Layout.astro";
+
+// Public page; a visitor who already has a session belongs in the application.
+if (Astro.locals.user) {
+  return Astro.redirect("/");
+}
+---
+
+<Layout title="Log in - MindAgora">
+  <div class="mx-auto mt-12 w-full max-w-sm">
+    <LoginForm client:load />
+  </div>
+</Layout>
