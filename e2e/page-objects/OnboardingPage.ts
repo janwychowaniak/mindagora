@@ -1,4 +1,4 @@
-import type { Locator, Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
 
 import { waitForHydration } from "../hydration";
 
@@ -24,15 +24,17 @@ export class OnboardingPage {
     await waitForHydration(this.page);
   }
 
-  // Saving the key triggers a full navigation back to /onboarding, which then shows the next step.
+  // Saving the key reloads /onboarding (same URL), which then renders the next step server-side.
   async saveApiKey(key: string) {
+    await waitForHydration(this.page);
     await this.apiKeyInput.fill(key);
     await this.apiKeySave.click();
-    await this.page.waitForURL("/onboarding");
+    await expect(this.currentStep).toHaveText(/Step 2 of 2/);
     await waitForHydration(this.page);
   }
 
   async finish() {
+    await waitForHydration(this.page);
     await this.continueButton.click();
     await this.page.waitForURL("/");
   }

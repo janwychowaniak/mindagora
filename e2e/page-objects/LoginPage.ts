@@ -22,6 +22,7 @@ export class LoginPage {
 
   // Submits and returns; the caller asserts where the page ends up (a failed sign-in stays here).
   async login(email: string, password: string) {
+    await waitForHydration(this.page);
     await this.email.fill(email);
     await this.password.fill(password);
     await this.submit.click();

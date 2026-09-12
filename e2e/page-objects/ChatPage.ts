@@ -37,6 +37,7 @@ export class ChatPage {
 
   // Radix Select renders its options in a portal; the option is found by the participant's alias.
   async chooseParticipant(alias: string) {
+    await waitForHydration(this.page);
     await this.participantSelect.click();
     await this.page.getByTestId("participant-option").filter({ hasText: alias }).click();
   }

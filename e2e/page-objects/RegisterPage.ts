@@ -23,6 +23,7 @@ export class RegisterPage {
   }
 
   async register(email: string, password: string) {
+    await waitForHydration(this.page);
     await this.email.fill(email);
     await this.password.fill(password);
     await this.confirmPassword.fill(password);

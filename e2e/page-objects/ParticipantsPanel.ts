@@ -1,5 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 
+import { waitForHydration } from "../hydration";
+
 // Shared by the settings page and the second onboarding step.
 export class ParticipantsPanel {
   readonly count: Locator;
@@ -17,17 +19,21 @@ export class ParticipantsPanel {
   }
 
   item(alias: string) {
-    return this.items.filter({ hasText: alias });
+    return this.items.filter({ has: this.page.getByText(alias, { exact: true }) });
   }
 
   // The combobox loads hundreds of models on first open; filtering by the model id narrows it to one row.
   async chooseModel(modelId: string) {
     await this.modelCombobox.click();
     await this.page.getByPlaceholder("Search models…").fill(modelId);
-    await this.page.getByTestId("model-option").filter({ hasText: modelId }).first().click();
+    await this.page
+      .getByTestId("model-option")
+      .filter({ has: this.page.getByText(modelId, { exact: true }) })
+      .click();
   }
 
   async add(alias: string, modelId: string) {
+    await waitForHydration(this.page);
     await this.aliasInput.fill(alias);
     await this.chooseModel(modelId);
     await this.addButton.click();
@@ -35,6 +41,7 @@ export class ParticipantsPanel {
   }
 
   async remove(alias: string) {
+    await waitForHydration(this.page);
     await this.item(alias).getByTestId("participant-delete").click();
     await this.page.getByTestId("confirm-dialog-confirm").click();
     await this.item(alias).waitFor({ state: "detached" });

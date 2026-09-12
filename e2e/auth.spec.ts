@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { e2eAccount, GUEST_STATE } from "./env";
+import { e2eAccount, GUEST_STATE, runTag } from "./env";
 import { AppShell } from "./page-objects/AppShell";
 import { LoginPage } from "./page-objects/LoginPage";
 
@@ -41,11 +41,14 @@ test.describe("authentication", () => {
     await expect(page).not.toHaveURL("/login");
   });
 
+  // Logout signs the account out everywhere (Supabase default scope), which would also kill the session the
+  // setup project saved for the other scenarios — so this one uses a throwaway account.
   test("logging out ends the session", async ({ page }) => {
-    const login = new LoginPage(page);
-    const { email, password } = e2eAccount();
-    await login.goto();
-    await login.login(email, password);
+    const registered = await page.request.post("/api/auth/register", {
+      data: { email: `${runTag()}-logout@mindagora.local`, password: e2eAccount().password },
+    });
+    expect(registered.status(), await registered.text()).toBe(201);
+    await page.goto("/");
     const shell = new AppShell(page);
     await expect(shell.logoutButton).toBeVisible();
 
