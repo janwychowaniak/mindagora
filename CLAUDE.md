@@ -32,8 +32,8 @@ GitHub Actions (planned) · Node 24 (`.nvmrc`) · Supabase CLI as a devDependenc
 - `src/lib/` — services and helpers; `src/assets/` — static internal assets; `public/` — public assets
 - `supabase/migrations/` — nine atomic migrations (enums → tables → indexes → triggers → RLS)
 - `e2e/` — Playwright scenarios and page objects (`playwright.config.ts`, `.env.test` from `.env.test.example`)
-- `.github/workflows/` — `pull-request.yml` (CI on PRs) and `gitleaks.yml`; `.github/actions/node-setup` is the shared
-  Node + `npm ci` step
+- `.github/workflows/` — `pull-request.yml` (CI on PRs), `master.yml` (lint, unit tests, container image to GHCR on every
+  push to `master`) and `gitleaks.yml`; `.github/actions/node-setup` is the shared Node + `npm ci` step
 - `.githooks/` — gitleaks + lint-staged hooks; after cloning run `git config core.hooksPath .githooks`
 
 ## Commands

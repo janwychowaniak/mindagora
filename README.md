@@ -77,8 +77,10 @@ MindAgora is designed for users who:
 ### CI/CD & Hosting
 
 - **GitHub Actions** - `pull-request.yml` on every PR to `master`: lint and type check, unit tests with coverage,
-  E2E tests on a Supabase stack started in the runner, production build, and a status comment on the PR
-- **DigitalOcean** - Application hosting via Docker (planned)
+  E2E tests on a Supabase stack started in the runner, production build, and a status comment on the PR;
+  `master.yml` on every push to `master`: lint and type check, unit tests, then the container image built and pushed
+  to GHCR (`ghcr.io/janwychowaniak/mindagora`, tags `latest` and `sha-<commit>`)
+- **Railway** - Application hosting from the GHCR image (deployment in progress: lesson 3x6, second pull request)
 
 ### Testing
 
