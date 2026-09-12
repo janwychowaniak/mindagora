@@ -6,13 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { RegisterResponseDTO } from "@/types";
 
-import {
-  NETWORK_ERROR_MESSAGE,
-  postJson,
-  readApiFailure,
-  validateCredentials,
-  type CredentialFieldErrors,
-} from "./auth-api";
+import { apiPost, fieldErrors as failureFieldErrors, formMessage } from "@/lib/api-client";
+
+import { validateCredentials, type CredentialFieldErrors } from "./auth-api";
 
 export function RegisterForm() {
   const [email, setEmail] = useState("");
@@ -37,29 +33,23 @@ export function RegisterForm() {
     }
 
     setSubmitting(true);
-    try {
-      const response = await postJson("/api/auth/register", { email: email.trim(), password });
-      if (response.ok) {
-        const payload = (await response.json()) as RegisterResponseDTO;
-        if (payload.confirmation_required) {
-          // Production: Supabase opened no session until the email address is confirmed.
-          setConfirmationRequired(true);
-          return;
-        }
-
-        // Local dev: signed in right away; full navigation so the server sees the new cookies.
-        window.location.assign("/");
+    const result = await apiPost<RegisterResponseDTO>("/api/auth/register", { email: email.trim(), password });
+    if (result.ok) {
+      if (result.data.confirmation_required) {
+        // Production: Supabase opened no session until the email address is confirmed.
+        setConfirmationRequired(true);
+        setSubmitting(false);
         return;
       }
 
-      const failure = await readApiFailure(response);
-      setFieldErrors(failure.fieldErrors);
-      setFormError(failure.message);
-    } catch {
-      setFormError(NETWORK_ERROR_MESSAGE);
-    } finally {
-      setSubmitting(false);
+      // Local dev: signed in right away; full navigation so the server sees the new cookies.
+      window.location.assign("/");
+      return;
     }
+
+    setFieldErrors(failureFieldErrors(result.failure));
+    setFormError(formMessage(result.failure));
+    setSubmitting(false);
   };
 
   if (confirmationRequired) {

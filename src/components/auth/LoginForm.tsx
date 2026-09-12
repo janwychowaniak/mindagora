@@ -5,13 +5,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import {
-  NETWORK_ERROR_MESSAGE,
-  postJson,
-  readApiFailure,
-  validateCredentials,
-  type CredentialFieldErrors,
-} from "./auth-api";
+import { apiPost, fieldErrors as failureFieldErrors, formMessage } from "@/lib/api-client";
+import type { LoginResponseDTO } from "@/types";
+
+import { validateCredentials, type CredentialFieldErrors } from "./auth-api";
 
 export function LoginForm() {
   const [email, setEmail] = useState("");
@@ -31,22 +28,16 @@ export function LoginForm() {
     }
 
     setSubmitting(true);
-    try {
-      const response = await postJson("/api/auth/login", { email: email.trim(), password });
-      if (response.ok) {
-        // Full navigation so the server renders the next page with the new session cookies.
-        window.location.assign("/");
-        return;
-      }
-
-      const failure = await readApiFailure(response);
-      setFieldErrors(failure.fieldErrors);
-      setFormError(failure.message);
-    } catch {
-      setFormError(NETWORK_ERROR_MESSAGE);
-    } finally {
-      setSubmitting(false);
+    const result = await apiPost<LoginResponseDTO>("/api/auth/login", { email: email.trim(), password });
+    if (result.ok) {
+      // Full navigation so the server renders the next page with the new session cookies.
+      window.location.assign("/");
+      return;
     }
+
+    setFieldErrors(failureFieldErrors(result.failure));
+    setFormError(formMessage(result.failure));
+    setSubmitting(false);
   };
 
   return (
