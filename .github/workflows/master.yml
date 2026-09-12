@@ -1,8 +1,9 @@
 name: master
 
 # Every push to master (only fast-forwarded pull requests that passed pull-request.yml land here) repeats the cheap
-# gates and publishes the container image to GHCR, tagged with the commit SHA and `latest`. The deployment job
-# behind the `production` environment arrives with the second pull request of lesson 3x6.
+# gates, publishes the container image to GHCR (tags: commit SHA and `latest`) and then waits at the `production`
+# environment gate: the deployment is a decision, not a side effect of merging. A pending approval holds the
+# concurrency group, so approve or reject it before the next push is expected to build.
 on:
   push:
     branches: [master]
@@ -69,3 +70,19 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy to Railway
+    needs: image
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Required reviewers on the environment gate this job. Railway then pulls the fresh `latest` digest from GHCR
+    # and restarts the service (the project token lives only in the environment secrets).
+    environment:
+      name: production
+      url: https://mindagora.ai
+    steps:
+      - name: Redeploy the Railway service from the image pushed above
+        run: npx -y @railway/cli@latest redeploy --service 6779ba16-0906-490a-ae9c-b7602fc0702a --yes
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
