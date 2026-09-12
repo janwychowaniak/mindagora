@@ -35,8 +35,8 @@ GitHub Actions (planned) · Node 24 (`.nvmrc`) · Supabase CLI as a devDependenc
 
 ## Commands
 
-`npm run dev` · `npm run build` · `npm run lint` / `lint:fix` · `npm test` ·
-`npx supabase start|stop|status` · `npx supabase db reset` (rebuild the local DB from migrations) ·
+`npm run dev` · `npm run build` · `npm run lint` / `lint:fix` · `npm test` (single run) / `test:watch` /
+`test:coverage` · `npx supabase start|stop|status` · `npx supabase db reset` (rebuild the local DB from migrations) ·
 `npx supabase gen types typescript --local > src/db/database.types.ts`
 
 Environment: `SUPABASE_URL`, `SUPABASE_KEY` (anon), optional `OPENROUTER_HTTP_REFERER`, `OPENROUTER_X_TITLE`.
@@ -74,8 +74,9 @@ _Starter recommendations from the 10x-astro-starter rules, carried over verbatim
 
 Done: schema + RLS, DTOs, OpenRouter service (unit-tested), 12 REST endpoints + 3 auth endpoints (verified by a
 curl smoke suite kept in the maintainer's workspace outside this repo), cookie session with Bearer kept for
-non-browser clients, and the full MVP UI: onboarding, settings, conversation list, chat. Not yet: test plan and
-component/hook tests (only the OpenRouter service is unit-tested), E2E tests, CI/CD, deployment. Major upgrades
+non-browser clients, the full MVP UI (onboarding, settings, conversation list, chat), and unit tests with Vitest +
+Testing Library for the helpers, onboarding logic, HTTP client, view hooks and the chat / title-editor components
+(the test plan lives in the maintainer's workspace). Not yet: E2E tests, CI/CD, deployment. Major upgrades
 (Astro 7, Zod 4, Vitest 5) are deliberately deferred.
 
 ## Rules

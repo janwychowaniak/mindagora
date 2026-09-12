@@ -77,10 +77,11 @@ MindAgora is designed for users who:
 
 ### Testing
 
-- **Vitest** - Unit testing framework
-- **React Testing Library** - React component testing
-- **Playwright** - End-to-end testing
-- **Codecov** - Code coverage tracking
+- **Vitest 4** - Unit tests for helpers, services, hooks and components (`npm test`), jsdom for DOM tests
+- **React Testing Library** + **user-event** - Hook and component tests
+- **curl smoke suite** - Integration tests of every endpoint against the local Supabase stack and the real
+  OpenRouter API, kept in the maintainer's workspace outside this repo
+- **Playwright** - End-to-end testing (planned)
 
 ## Getting Started Locally
 
@@ -156,8 +157,9 @@ After launching the application:
 - `npm run lint` - Run ESLint to check for code issues
 - `npm run lint:fix` - Run ESLint and automatically fix issues
 - `npm run format` - Format code with Prettier
-- `npm test` - Run unit tests (Vitest)
+- `npm test` - Run the unit tests once (Vitest)
 - `npm run test:watch` - Run unit tests in watch mode
+- `npm run test:coverage` - Run unit tests with a V8 coverage report
 - `npx supabase start` / `npx supabase stop` - Start / stop the local Supabase stack (Docker)
 - `npx supabase db reset` - Rebuild the local database from `supabase/migrations/`
 
