@@ -10,7 +10,7 @@ paths:
 
 ## Layering
 
-middleware (JWT → `locals.user`, `locals.supabase`) → handler (guard auth → validate → call service → map to HTTP)
+middleware (Bearer token or cookie session → `locals.user`, `locals.supabase`) → handler (guard auth → validate → call service → map to HTTP)
 → service (pure logic + Supabase queries, returns `{ data, error }`). Handlers never query Supabase directly;
 services never build HTTP responses.
 
@@ -49,7 +49,8 @@ Keep schemas inline in the endpoint file until they are reused.
 - Success: `200` (GET/PUT/DELETE), `201` (POST).
 - `400 "Bad Request"` for structural problems (Content-Type, malformed JSON, invalid UUID);
   `400 "Validation error"` for business rules on valid JSON (`details` = field → message map, or a string).
-- `401 "Unauthorized"` only for a missing/invalid session. `412 "No API key"` when the user has no configured
+- `401 "Unauthorized"` only for a missing/invalid session (plus a rejected sign-in on `POST /api/auth/login`,
+  which the form shows inline instead of redirecting). `412 "No API key"` when the user has no configured
   OpenRouter key (onboarding precondition). `404 "Not Found"`, `409 "Conflict"` (duplicate alias),
   `408 "Validation timeout"` (key validation > 10 s).
 - OpenRouter 4xx (invalid key, no credits, rate limit) → `500 "OpenRouter API error"` with `details` passed

@@ -12,14 +12,19 @@ the context as an "optimisation" — that would be a product decision, not a tec
 ## Stack
 
 Astro 5 (SSR, Node adapter, port 3000) · React 19 islands · TypeScript 5 · Tailwind 4 · shadcn/ui
-(new-york, neutral) · Supabase (PostgreSQL 17, Auth, RLS) · OpenRouter API · Vitest · Playwright (planned) ·
+(new-york, neutral) · Supabase (PostgreSQL 17, Auth via `@supabase/ssr` cookies, RLS) · OpenRouter API · Vitest · Playwright (planned) ·
 GitHub Actions (planned) · Node 24 (`.nvmrc`) · Supabase CLI as a devDependency (`npx supabase`).
 
 ## Layout
 
 - `src/pages/api/**` — REST endpoints (Astro server endpoints, `export const prerender = false`)
 - `src/lib/services/*.service.ts` — business logic + Supabase queries; services know nothing about HTTP
-- `src/middleware/index.ts` — JWT verification, injects `locals.user` and an authed `locals.supabase`
+- `src/middleware/index.ts` — session: `Authorization: Bearer` or the cookie session (`@supabase/ssr`); injects
+  `locals.user` and a per-user `locals.supabase`
+- `src/lib/api-client.ts` — the one HTTP client the React islands use for `/api/*` (401 → `/login`, 412 → `/settings`);
+  `src/lib/onboarding-gate.ts` — server-side gate for pages behind onboarding
+- `src/components/{auth,settings,onboarding,conversations,chat,shared}/` — React islands, one per view, with one hook
+  per view in `src/components/hooks/`
 - `src/db/` — Supabase client and generated database types; `src/types.ts` — DTOs and Command models
   (single source of truth for API contracts)
 - `src/components/` — Astro for static markup, React only where interactivity is needed; `src/components/ui`
@@ -65,9 +70,11 @@ _Starter recommendations from the 10x-astro-starter rules, carried over verbatim
 
 ## Status (September 2026)
 
-Done: schema + RLS, DTOs, OpenRouter service (unit-tested), all 12 REST endpoints (verified by a curl smoke
-suite kept in the maintainer's workspace outside this repo). Not yet: UI, auth screens, E2E tests, CI/CD,
-deployment. Major upgrades (Astro 7, Zod 4, Vitest 5) are deliberately deferred.
+Done: schema + RLS, DTOs, OpenRouter service (unit-tested), 12 REST endpoints + 3 auth endpoints (verified by a
+curl smoke suite kept in the maintainer's workspace outside this repo), cookie session with Bearer kept for
+non-browser clients, and the full MVP UI: onboarding, settings, conversation list, chat. Not yet: test plan and
+component/hook tests (only the OpenRouter service is unit-tested), E2E tests, CI/CD, deployment. Major upgrades
+(Astro 7, Zod 4, Vitest 5) are deliberately deferred.
 
 ## Rules
 
