@@ -1,6 +1,7 @@
 import { defineMiddleware } from "astro:middleware";
 
 import { createSupabaseServerInstance, supabaseClient } from "../db/supabase.client.ts";
+import { isUnusedAstroRoute } from "../lib/internal-routes.ts";
 import { createAuthedSupabaseClient, extractBearerToken, getAuthenticatedUser } from "../lib/services/auth.service.ts";
 import type { ApiErrorResponseDTO } from "../types.ts";
 
@@ -35,6 +36,11 @@ const jsonError = (status: number, error: string, details: string) =>
 export const onRequest = defineMiddleware(async (context, next) => {
   const { request, cookies, redirect } = context;
   const { pathname } = new URL(request.url);
+
+  // Astro's own endpoints that this app does not use are closed before anything else (src/lib/internal-routes.ts).
+  if (isUnusedAstroRoute(pathname)) {
+    return new Response("Not Found", { status: 404 });
+  }
 
   if (isStaticAsset(pathname)) {
     return next();
