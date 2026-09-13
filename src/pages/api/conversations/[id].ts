@@ -91,9 +91,9 @@ export const GET = async (context: APIContext) => {
   }
 
   if (!conversation) {
-    // RLS izoluje zasoby innych userow, wiec authed client zwraca null
-    // zarowno dla "nie istnieje", jak i "nie nalezy do Ciebie".
-    // Celowo mapujemy oba przypadki na 404 (anti-enumeration / information disclosure defense).
+    // RLS hides other users' rows, so the authenticated client returns null both for
+    // "does not exist" and "is not yours". Both cases deliberately map to 404
+    // (anti-enumeration / information disclosure defense).
     return jsonError(404, "Not Found", "Conversation not found");
   }
 
