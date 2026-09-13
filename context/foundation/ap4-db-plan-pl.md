@@ -196,7 +196,7 @@ CREATE INDEX idx_messages_conversation_id ON messages(conversation_id);
 CREATE INDEX idx_messages_conversation_created ON messages(conversation_id, created_at ASC);
 
 -- Partial index pod ON DELETE SET NULL przy usuwaniu uczestnika (bez niego DELETE uczestnika
--- skanuje całą tabelę messages). Dodany 2026-01-31 przy implementacji DELETE /api/ai-participants/:id.
+-- skanuje całą tabelę messages). Dodany przy implementacji DELETE /api/ai-participants/:id.
 CREATE INDEX IF NOT EXISTS idx_messages_ai_participant_id
 ON messages(ai_participant_id) WHERE ai_participant_id IS NOT NULL;
 ```

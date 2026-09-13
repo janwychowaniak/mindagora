@@ -317,7 +317,7 @@ The application was built from written documents, not the other way round. They 
 - `context/archive/` — the implementation plans that were executed for every endpoint, the OpenRouter service and
   every view, kept as a record of the reasoning at the time
 
-The foundation documents are in Polish (the course language); `context/README.md` maps them to the 10xDevs 3.0
+The foundation documents are in Polish (the course language); `context/README.md` maps them to the `context/`
 vocabulary and explains the deviation from the English-only rule of this repository.
 
 ## Project Status
@@ -325,8 +325,8 @@ vocabulary and explains the deviation from the English-only rule of this reposit
 🟢 **MVP live at [mindagora.ai](https://mindagora.ai)**
 
 The MVP scope above is implemented, tested (unit, integration smoke, E2E) and deployed; see
-[Deployment & Releases](#deployment--releases) and [Project Context](#project-context). MindAgora is a course project (10xDevs 2.0) that keeps evolving as a
-portfolio piece and as material for the next course editions.
+[Deployment & Releases](#deployment--releases) and [Project Context](#project-context). MindAgora is a course project (10xDevs) that keeps evolving as a
+portfolio piece.
 
 ### Success Metrics
 

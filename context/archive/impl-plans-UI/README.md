@@ -1,7 +1,7 @@
-# Plany implementacji widoków (lekcja 2x5)
+# Plany implementacji widoków
 
 Plany per widok wg struktury promptu UI-4 (przegląd, routing, komponenty, typy, stan, integracja API, interakcje,
-walidacja, błędy, kroki), pisane **tuż przed** implementacją danego widoku (decyzja 2026-09-12, brief 2x5 §8.14).
+walidacja, błędy, kroki), pisane **tuż przed** implementacją danego widoku (decyzja 2026-09-12).
 Nadrzędne: `ap7-ui-plan-pl.md` (architektura, mapa tras, macierz błędów), PRD (ap2), plan API (ap5), reguła
 `.claude/rules/frontend.md`. Źródłem prawdy po implementacji jest kod; plany zostają jako zapis intencji
 (jak `impl-plans-API/`).

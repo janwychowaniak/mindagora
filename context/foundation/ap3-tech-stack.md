@@ -25,7 +25,7 @@ CI/CD i Hosting:
 - Github Actions do tworzenia pipeline'ów CI/CD
 - Railway do hostowania aplikacji z obrazu Dockera publikowanego na GHCR (wdrożenie na każdy push do master przez `master.yml`,
   wydanie za bramką środowiska GitHub `production`); Cloudflare: domena `mindagora.ai`, DNS i TLS (decyzja E8, 2026-09-12;
-  analiza hostingu: ap9; DigitalOcean z kursu został fallbackiem)
+  analiza hostingu: ap9; DigitalOcean został fallbackiem)
 
 Testing:
 

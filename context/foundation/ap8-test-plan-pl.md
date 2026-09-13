@@ -1,35 +1,35 @@
 # Plan testów MindAgora (ap8)
 
-Stan: 2026-09-12, lekcja 3x2 (Zad. 1). Źródło prawdy dla procesu QA razem z kodem testów (`src/**/*.test.ts(x)`,
+Stan: 2026-09-12. Źródło prawdy dla procesu QA razem z kodem testów (`src/**/*.test.ts(x)`,
 `vitest.config.ts`, `src/test/setup.ts`), skryptem smoke (`sketch/smoke-baseline.sh` + `baseline-*.out`) i regułą
 `.claude/rules/testing.md`. Powiązane: PRD (ap2), plan API (ap5 §9), stack (ap3), spec auth (ap6), plan UI (ap7 §5.4),
 inwentarz (`sketch/triage-inwentarz.md`: E4, A6, A14, A15). Dokument opisuje strategię, zakres, scenariusze i kryteria,
-nie implementację testów. Struktura wg promptu kursu `test-plan.mdc`, skrojona pod projekt jednoosobowy (§7, §9, §10
+nie implementację testów. Struktura wg szablonu `test-plan.mdc`, skrojona pod projekt jednoosobowy (§7, §9, §10
 skrócone do tego, co ma u nas nośnik).
 
-## 0. Decyzje (brief 3x2 §8, 2026-09-12)
+## 0. Decyzje (2026-09-12)
 
 1. **Piramida (E4):** unit (Vitest, bez sieci i bazy) → integracja = smoke curl (realny serwer, Supabase lokalny,
-   OpenRouter, RLS) → E2E Playwright (lekcja 3x3). Testów integracyjnych endpointów z mockiem OpenRoutera w Vitest
+   OpenRouter, RLS) → E2E Playwright. Testów integracyjnych endpointów z mockiem OpenRoutera w Vitest
    nie piszemy — dublowałyby smoke z gorszą wiernością.
 2. Plan po polsku w `specs_ai/`, cross-check drugim czytelnikiem (subagent) zamiast drugiego modelu w AI Studio.
-3. Zakres unitów w 3x2: priorytet P1 w całości, dwa–trzy hooki (P2), dwa–trzy komponenty (P3). Kompensacje
+3. Zakres unitów w etapie testów jednostkowych: priorytet P1 w całości, dwa–trzy hooki (P2), dwa–trzy komponenty (P3). Kompensacje
    w `conversations.service` (P2b) i ekstrakcje (P4) — później.
 4. Środowisko: domyślnie `node`; pliki hooków i komponentów deklarują `// @vitest-environment jsdom`.
-5. Narzędzia: Vitest 4.1 (Vitest 5 po certyfikacie ed3, D4b), jsdom, React Testing Library, jest-dom, user-event,
+5. Narzędzia: Vitest 4.1 (Vitest 5 odłożone, D4b), jsdom, React Testing Library, jest-dom, user-event,
    `@vitest/coverage-v8` w wersji Vitest; bez `@vitest/ui`, bez MSW, bez progów pokrycia.
 6. `npm test` = `vitest run` (jednorazowy przebieg dla agenta i CI), `npm run test:watch` = `vitest`,
-   `npm run test:coverage` = raport v8 na żądanie; pre-commit bez testów (lint-staged zostaje szybki; strażnikiem testów jest reguła „`npm test` przed commitem” i CI od 3x5).
+   `npm run test:coverage` = raport v8 na żądanie; pre-commit bez testów (lint-staged zostaje szybki; strażnikiem testów jest reguła „`npm test` przed commitem” i CI).
 7. Konwencje w `.claude/rules/testing.md`; nowa logika ze szwem czystym dostaje test w tym samym commicie
    (`CLAUDE.md` aplikacji).
 8. Kolokacja: `*.test.ts(x)` obok źródła.
-9. Ekstrakcje pod testy (duplikaty endpointów, predykaty middleware, prywatne helpery serwisów) → 3x4 (A6, A15).
+9. Ekstrakcje pod testy (duplikaty endpointów, predykaty middleware, prywatne helpery serwisów) → etap refaktoryzacji (A6, A15).
 
 ## 1. Wprowadzenie i cele
 
 MindAgora to czat z wieloma uczestnikami AI (OpenRouter) i jednym, zawsze pełnym kontekstem konwersacji. MVP jest
 funkcjonalnie kompletne (backend: 12 endpointów + 3 auth, RLS; UI: onboarding, ustawienia, lista, czat). Przed nami
-refaktoryzacja (3x4), CI (3x5), wdrożenie (3x6) i revamp pod edycję 3 — każdy z tych kroków potrzebuje siatki
+refaktoryzacja, CI, wdrożenie i dalsza rozbudowa — każdy z tych kroków potrzebuje siatki
 bezpieczeństwa.
 
 Cele testów:
@@ -39,7 +39,7 @@ Cele testów:
 - **Ochrona wartości produktu:** pełny kontekst do każdego uczestnika, brak trybu „skrótu”; izolacja danych między
   użytkownikami (RLS); brak trwałych półproduktów po błędzie OpenRoutera (kompensacja).
 - **Dokumentacja zachowań:** testy nazywają reguły z PRD/ap5/ap7 (np. auto-tytuł, 412 bez klucza, Enter wysyła).
-- **Gotowość na CI (3x5):** `npm test` i `npm run lint` jako bramki PR; E2E (3x3) jako bramka opcjonalna.
+- **Gotowość na CI:** `npm test` i `npm run lint` jako bramki PR; E2E jako bramka opcjonalna.
 
 Zasady: testy chronią zachowanie, nie implementację; nie ma testów bez sensu biznesowego; unit nie dotyka sieci ani
 bazy; tam, gdzie mock dublowałby pracę, jest realna integracja (smoke); losowość, czas i strefa czasowa są w testach
@@ -70,13 +70,13 @@ jeden użytkownik naraz), audyt dostępności (Lighthouse/axe — kandydat po wd
 
 ## 3. Strategia: poziomy testów
 
-| Poziom         | Narzędzie                                                                            | Co sprawdza                                                                                   | Środowisko                                                                      | Kiedy                                                             | Stan 2026-09-12                                                                                                        |
-| -------------- | ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Statyczne      | TypeScript przez `npm run check` (`astro check`, od 3x5), ESLint, Prettier, gitleaks | typy (także `.astro`), styl, sekrety                                                          | lokalnie + hooki + CI                                                           | każdy commit; job `lint` w CI                                     | gitleaks CI, lint-staged, `check` w CI                                                                                 |
-| Jednostkowe    | Vitest 4 (`node` / `jsdom` per plik), RTL, user-event                                | czyste funkcje, hooki, komponenty z logiką                                                    | bez sieci i bazy                                                                | `npm test` przed commitem; CI od 3x5                              | 10 testów serwisu OpenRouter → 3x2 rozszerza                                                                           |
-| Integracyjne   | `sketch/smoke-baseline.sh` (curl, Bearer + cookie)                                   | endpointy end-to-end z realnym Supabase, OpenRouterem, RLS, triggerami                        | dev server :3000, Supabase lokalny, klucz OpenRouter                            | przed commitem zmian endpointów / serwisów / migracji             | 110 PASS / 0 FAIL / 5 SKIP, 14 prefiksów ID w 15 blokach                                                               |
-| E2E            | Playwright 1.63 (`e2e/`, Chromium, 1 worker)                                         | przepływy użytkownika w przeglądarce: auth, onboarding, rozmowa z realnym OpenRouterem, lista | LOKALNY stos Supabase, `.env.test`, konto E2E z projektu `setup`, `data-testid` | `npm run test:e2e` lokalnie; job `e2e` w CI na każdym PR (od 3x5) | 10 testów + setup/teardown (2026-09-12); bez klucza OpenRoutera 6 pomijanych; model `meta-llama/llama-3.2-1b-instruct` |
-| Bezpieczeństwo | smoke (RLS), gitleaks, przegląd kodu (`api.md`)                                      | izolacja użytkowników, sekrety, brak service role, CSRF (SameSite + Content-Type, ap5 §8.5)   | jw.                                                                             | jw.                                                               | RLS w smoke; gitleaks                                                                                                  |
+| Poziom         | Narzędzie                                                                    | Co sprawdza                                                                                   | Środowisko                                                                      | Kiedy                                                    | Stan 2026-09-12                                                                                                        |
+| -------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Statyczne      | TypeScript przez `npm run check` (`astro check`), ESLint, Prettier, gitleaks | typy (także `.astro`), styl, sekrety                                                          | lokalnie + hooki + CI                                                           | każdy commit; job `lint` w CI                            | gitleaks CI, lint-staged, `check` w CI                                                                                 |
+| Jednostkowe    | Vitest 4 (`node` / `jsdom` per plik), RTL, user-event                        | czyste funkcje, hooki, komponenty z logiką                                                    | bez sieci i bazy                                                                | `npm test` przed commitem; CI                            | 10 testów serwisu OpenRouter → etap testów jednostkowych rozszerza                                                     |
+| Integracyjne   | `sketch/smoke-baseline.sh` (curl, Bearer + cookie)                           | endpointy end-to-end z realnym Supabase, OpenRouterem, RLS, triggerami                        | dev server :3000, Supabase lokalny, klucz OpenRouter                            | przed commitem zmian endpointów / serwisów / migracji    | 110 PASS / 0 FAIL / 5 SKIP, 14 prefiksów ID w 15 blokach                                                               |
+| E2E            | Playwright 1.63 (`e2e/`, Chromium, 1 worker)                                 | przepływy użytkownika w przeglądarce: auth, onboarding, rozmowa z realnym OpenRouterem, lista | LOKALNY stos Supabase, `.env.test`, konto E2E z projektu `setup`, `data-testid` | `npm run test:e2e` lokalnie; job `e2e` w CI na każdym PR | 10 testów + setup/teardown (2026-09-12); bez klucza OpenRoutera 6 pomijanych; model `meta-llama/llama-3.2-1b-instruct` |
+| Bezpieczeństwo | smoke (RLS), gitleaks, przegląd kodu (`api.md`)                              | izolacja użytkowników, sekrety, brak service role, CSRF (SameSite + Content-Type, ap5 §8.5)   | jw.                                                                             | jw.                                                      | RLS w smoke; gitleaks                                                                                                  |
 
 **Dobór poziomu:** czysta funkcja → unit. Logika stanu hooka → unit z `vi.mock("@/lib/api-client")`. Interakcja
 użytkownika z komponentem bez Radix → unit z user-event. Wszystko, co wymaga bazy, RLS, OpenRoutera, cookies lub Radix →
@@ -124,14 +124,14 @@ timeouty, klasy błędów)
 
 ### 4.2. Kandydaci do testów jednostkowych (prompt „Analiza kandydatów”)
 
-Priorytet: P1 = czyste i tanie, P2 = hooki, P3 = komponenty, P4 = po ekstrakcji (3x4). Kolumna „Scenariusze” to
+Priorytet: P1 = czyste i tanie, P2 = hooki, P3 = komponenty, P4 = po ekstrakcji (etap refaktoryzacji). Kolumna „Scenariusze” to
 zbiór przypadków, z których testy wybierają te z sensem biznesowym; „Uwagi” — szwy i pułapki.
 
 **P1 — helpery i funkcje czyste (środowisko `node`)**
 
 | Moduł                                | Funkcja                           | Scenariusze                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Uwagi                                                                                                                                                                                                                                                                                                  |
 | ------------------------------------ | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `lib/services/onboarding.service.ts` | `resolveOnboardingStep`           | brak klucza → `api-key` (niezależnie od liczby uczestników); klucz + 0/1 uczestników → `participants`; klucz + 2 i więcej → `complete`; próg = `MIN_PARTICIPANTS`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | pierwszy test lekcji; reguła PRD §3.2                                                                                                                                                                                                                                                                  |
+| `lib/services/onboarding.service.ts` | `resolveOnboardingStep`           | brak klucza → `api-key` (niezależnie od liczby uczestników); klucz + 0/1 uczestników → `participants`; klucz + 2 i więcej → `complete`; próg = `MIN_PARTICIPANTS`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | pierwszy test; reguła PRD §3.2                                                                                                                                                                                                                                                                         |
 |                                      | `getOnboardingStatus`             | błąd ustawień → `{data:null,error}`; błąd zliczania → error; `count: null` → error z komunikatem zastępczym (gałąź obronna: `countAiParticipants` sam zamienia `null` na błąd, osiągalna tylko przez mock); pusty klucz `""` → `hasApiKey: false`; klucz + count → `data`                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `vi.mock` `user-settings.service` i `ai-participants.service`; nie importować `supabase.client`                                                                                                                                                                                                        |
 | `lib/format.ts`                      | `formatRelative(iso, now)`        | 0–59 s → `just now`; 60 s → `1m ago`; 59 min → `59m ago`; 1 h → `1h ago`; 23 h; 1 d → `1d ago`; 6 d; 7 d → dzień (`formatDay`); granice dokładnie na progu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | `now` wstrzyknięte; wynik do 7 dni niezależny od TZ                                                                                                                                                                                                                                                    |
 |                                      | `formatDay(iso, now)`             | ten sam rok → bez roku; inny rok → z rokiem                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | ISO z godziną 12:00 UTC, żeby TZ nie przesunął dnia                                                                                                                                                                                                                                                    |
@@ -152,7 +152,7 @@ zbiór przypadków, z których testy wybierają te z sensem biznesowym; „Uwagi
 | `useConversations`              | start: `loading` → po sukcesie `ready` z listą w kolejności z API; błąd → `error` + `loadError`; `reload` czyści błąd; `rename` sukces → tytuł podmieniony, kolejność bez zmian, zwraca `null`; `rename` 404 → wiersz usunięty lokalnie, zwraca failure; `rename` 400 → lista nietknięta, zwraca failure; `remove` sukces → wiersz usunięty; `remove` 404 → wiersz usunięty, zwraca `null`; `remove` 500 → lista nietknięta, zwraca failure                                                                                                                                                                                                                                             |
 | `useConversation`               | `null` (szkic): ładuje tylko uczestników, `conversation === null`, `ready`; id: równoległe `GET` uczestników i konwersacji; błąd uczestników → `error`; konwersacja 404 → `not-found`; konwersacja 500 → `error`; `send` z nieznanym uczestnikiem → failure `status: 0`, bez wywołania API; `send` w szkicu → `POST /api/conversations` z `{user_message, ai_participant_id}`, `pending` ustawiony w trakcie i wyczyszczony po, `conversation` = odpowiedź, `history.replaceState` z `/conversations/:id`; `send` w konwersacji → `POST …/messages`, dwie wiadomości dopisane, `updated_at` z odpowiedzi AI; `send` z błędem → `pending` wyczyszczony, failure zwrócony, stan bez zmian |
 | `useModels`                     | `idle` na starcie, bez wywołań; `load` → `loading` → `ready` z listą; drugie `load()` bez `retry` → brak drugiego wywołania; po błędzie `load(true)` i zwykłe `load()` → ponowne wywołanie (`startedRef` zresetowany); 412 → komunikat „Add your OpenRouter API key first.”; inny błąd → `failure.message`                                                                                                                                                                                                                                                                                                                                                                              |
-| `useParticipants` (opcjonalnie) | `add` wstawia w porządku aliasów (bez rozróżniania wielkości liter); `remove` 404 → failure, lista nietknięta (inaczej niż `useConversations` — rozjazd A17, do ujednolicenia w 3x4)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `useParticipants` (opcjonalnie) | `add` wstawia w porządku aliasów (bez rozróżniania wielkości liter); `remove` 404 → failure, lista nietknięta (inaczej niż `useConversations` — rozjazd A17, do ujednolicenia w etapie refaktoryzacji)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `useApiKey` (opcjonalnie)       | `load: false` → `ready` bez wywołania; `load: true` → `ready` z ustawieniami / `error` z `loadError`; `save` → `saving` w trakcie, `settings` po sukcesie, zwraca wynik                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 **P3 — komponenty (`jsdom`, `render` + `user-event`, zapytania po roli i `data-testid` z ap7 §5.4)**
@@ -165,7 +165,7 @@ zbiór przypadków, z których testy wybierają te z sensem biznesowym; „Uwagi
 | `MessageItem`       | `user` → „User”; uczestnik → „AI - alias” w jego kolorze; `assistant` z `ai_participant: null` → „(Deleted Participant)” w `#808080` (PRD §3.4)                                                                                                                                                                                                                                                                                                                                                                                                    | bez Radix, tani                                                                                                                                          |
 | `ChatView`          | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | poza P3: w stanie `ready` renderuje `Composer` → `ParticipantPicker` (Radix Select) i `ErrorDialog` (Radix); `not-found` i `document.title` sprawdzi E2E |
 
-**P4 — testy po ekstrakcji (3x4; A6, A15). W 3x2 nie ruszamy kodu produkcyjnego.**
+**P4 — testy po ekstrakcji (etap refaktoryzacji; A6, A15). W etapie testów jednostkowych nie ruszamy kodu produkcyjnego.**
 
 | Kod                                                                                                                                                                   | Dziś                                                     | Po ekstrakcji: testy                                                                                                                                                                                                                                                      |
 | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -190,7 +190,7 @@ zbiór przypadków, z których testy wybierają te z sensem biznesowym; „Uwagi
 - **Formularze auth (`LoginForm`, `RegisterForm`, `LogoutButton`), `ApiKeyForm`, `ParticipantList`,
   `ConversationListItem`, `ModelCombobox`** — mają gałęzie (np. `LogoutButton`: status 0 / inny błąd / sukces;
   `RegisterForm`: „Passwords do not match”, `confirmation_required`; `ApiKeyForm`: 400-string / 408 → dialog), ale to
-  głównie przekazanie błędów z `api-client` (przetestowanego) do pól oraz dialogi Radix; taniej i wierniej w E2E (3x3),
+  głównie przekazanie błędów z `api-client` (przetestowanego) do pól oraz dialogi Radix; taniej i wierniej w E2E,
   gdzie i tak przechodzi cały przepływ. Kandydaci na później, jeśli E2E okaże się za drogie: `AddParticipantForm`
   (własna walidacja, 409 → pole alias; bez Radix — Popover jest w dziecku `ModelCombobox`), `RegisterForm`
   (zgodność haseł nie ma odpowiednika serwerowego).
@@ -224,7 +224,7 @@ Luki smoke (kandydaci na rozszerzenie skryptu, nie na unity): wysłanie do uczes
 Czego smoke nie sprawdza (świadomie): treść żądania do OpenRoutera (pełny kontekst) — patrz P4; błąd bazy w połowie
 przepływu — P2b; zachowanie przeglądarki (cookies w UI, przekierowania z `api-client`) — E2E.
 
-### 4.5. Scenariusze E2E (Playwright, lekcja 3x3 — wdrożone 2026-09-12)
+### 4.5. Scenariusze E2E (Playwright — wdrożone 2026-09-12)
 
 Page Objecty per strona (`e2e/page-objects/`), konto E2E z projektu `setup` (rejestracja albo logowanie przez
 `/api/auth/*`, klucz OpenRoutera z `E2E_OPENROUTER_KEY`, uczestnicy „E2E Alpha”/„E2E Beta”, sesja w `storageState`),
@@ -237,7 +237,7 @@ teardown pod RLS. Scenariusze z modelem (`requireOpenRouterKey`) pomijane bez kl
 | `conversation.spec.ts` (S3)      | `New conversation` → szkic → uczestnik Alpha + Enter → `pending-reply` → 2 wiadomości (user, „AI - E2E Alpha”) → URL `/conversations/:id` bez przeładowania, tytuł = auto-tytuł, pole puste → druga wiadomość do Bety → 4 wiadomości → lista z tytułem i licznikiem 4 | tak (2 wywołania)    |
 | `conversation-list.spec.ts` (S4) | konwersacja z API w `beforeEach`; Enter zapisuje tytuł (trwa po reload); Escape anuluje; pusty tytuł → „Title cannot be empty”; delete z `ConfirmDialog` → wiersz znika (trwa po reload); `/conversations/<uuid>` nieistniejący → karta „not found” (bez klucza)      | tak (poza not-found) |
 
-Poza 3x3 (kandydaci S5+): 412 (klucz nie do usunięcia z UI), usunięty uczestnik w czacie, błędy sieci/timeoutu
+Poza etapem E2E (kandydaci S5+): 412 (klucz nie do usunięcia z UI), usunięty uczestnik w czacie, błędy sieci/timeoutu
 OpenRoutera, `settings-notice`. Pułapki poznane przy wdrożeniu: hydracja wysp Astro (każda akcja POM czeka, aż
 zniknie `astro-island[ssr]`), globalny `signOut`, edytor tytułu podmieniający przycisk na pole (lokatory na liście,
 nie na elemencie filtrowanym po tytule).
@@ -250,17 +250,17 @@ nie na elemencie filtrowanym po tytule).
   `cleanup` po każdym teście), `src/test/fixtures.ts` (budowniczowie DTO, `ok`/`failure`, `deferred`).
   Bez `.env`: `db/supabase.client.ts` tworzy klienta przy imporcie i rzuca bez URL — nie importować w unitach;
   `auth.service.ts` i `openrouter.service.ts` czytają env przy imporcie, ale używają go dopiero w funkcjach (bezpieczne).
-  Lokalny `.env` jest ładowany przez `getViteConfig`, więc raz na lekcję uruchomić przebieg z przemianowanym `.env`
+  Lokalny `.env` jest ładowany przez `getViteConfig`, więc raz na etap uruchomić przebieg z przemianowanym `.env`
   (2026-09-12: 128/128 bez `.env`). Bez sieci: `fetch` zawsze stubowany.
 - **Smoke:** `npx supabase start` (PG 17, PostgREST 16, Auth z wyłączonym potwierdzaniem e-mail), dev server na
   porcie 3000 z pidfile, env `SUPA_URL`, `ANON`, `OR_KEY` (`sketch/.env.smoke`, ignorowany), realny klucz OpenRouter
   (model `openai/gpt-4o-mini-2024-07-18`, koszt groszowy per przebieg). Wynik do `sketch/baseline-<data>.out`.
-- **E2E:** LOKALNY stos Supabase (decyzja E6 — projekt chmurowy odłożony do 3x6), `.env.test` z lokalnymi URL/anon
+- **E2E:** LOKALNY stos Supabase (decyzja E6 — projekt chmurowy odłożony do etapu wdrożenia), `.env.test` z lokalnymi URL/anon
   key + `E2E_USERNAME`/`E2E_PASSWORD`/`E2E_OPENROUTER_KEY` (`.env.test.example`), `astro dev --mode test` jako
   `webServer` Playwrighta (port 3000, działający dev server jest reużywany), Chromium Playwrighta w `~/.cache/ms-playwright`
   (bez `--with-deps`), `workers: 1`, `storageState` w `playwright/.auth/` (ignorowany), teardown przez supabase-js
   pod RLS z odmową dla nielokalnego URL. Konta jednorazowe (onboarding, logout) zostają w lokalnym `auth.users`.
-- **CI (od 3x5, `.github/workflows/pull-request.yml`):** na każdym PR do `master` i ręcznie; `ubuntu-latest`, Node
+- **CI (`.github/workflows/pull-request.yml`):** na każdym PR do `master` i ręcznie; `ubuntu-latest`, Node
   z `.nvmrc` przez composite action `node-setup` (`npm ci` z cache); joby: `lint` (eslint + `astro check`) → `unit`
   (`test:coverage`, artefakt `coverage/`) ∥ `build` ∥ `e2e` (własny stos Supabase w runnerze: `npx supabase start -x`
   bez studio/storage/realtime/logflare/…, `.env.test` z `supabase status -o env`, Chromium `--with-deps`, artefakt
@@ -272,7 +272,7 @@ nie na elemencie filtrowanym po tytule).
 
 | Narzędzie                                  | Wersja (2026-09-12)                     | Rola                                                   |
 | ------------------------------------------ | --------------------------------------- | ------------------------------------------------------ |
-| Vitest                                     | 4.1.11 (5.0 po ed3, D4b)                | runner, `vi`, fake timers, coverage v8                 |
+| Vitest                                     | 4.1.11 (5.0 odłożone, D4b)              | runner, `vi`, fake timers, coverage v8                 |
 | `@vitest/coverage-v8`                      | 4.1.11 (= Vitest)                       | `npm run test:coverage`: raport na żądanie, bez progów |
 | jsdom                                      | 29.x (30 wymaga Node ≥ 24.15)           | DOM dla hooków i komponentów                           |
 | `@testing-library/react` + `dom`           | 16.3.x / 10.x                           | `render`, `renderHook`, zapytania po roli              |
@@ -286,17 +286,17 @@ Nieużywane świadomie: `@vitest/ui`, MSW, happy-dom, snapshoty, Jest, Cypress, 
 
 ## 7. Harmonogram
 
-Wyznaczają go lekcje kursu: 3x2 — środowisko + P1 + P2 (2–3 hooki) + P3 (2–3 komponenty) (zrobione); 3x3 — E2E S1–S4
+Wyznaczają go etapy: testy jednostkowe — środowisko + P1 + P2 (2–3 hooki) + P3 (2–3 komponenty) (zrobione); E2E — S1–S4
 na lokalnym stosie (zrobione);
-3x4 — ekstrakcje z P4 i ich testy, ewentualnie P2b; 3x5 — CI na PR-ach (zrobione); 3x6 — `master.yml` i deploy.
-Od 3x2 każda nowa funkcjonalność dostaje testy w tym samym commicie, gdy ma szew czysty.
+refaktoryzacja — ekstrakcje z P4 i ich testy, ewentualnie P2b; CI na PR-ach (zrobione); wdrożenie — `master.yml` i deploy.
+Od etapu testów jednostkowych każda nowa funkcjonalność dostaje testy w tym samym commicie, gdy ma szew czysty.
 
 ## 8. Kryteria akceptacji
 
 - **Commit:** `npm test` (= `vitest run`) zielone, `npm run lint` czysty; przy zmianie endpointu, serwisu Supabase
   lub migracji dodatkowo pełny smoke bez regresji względem ostatniego `baseline-*.out`.
-- **Lekcja:** DoD briefu (`sketch/lekcje/<ID>-brief.md`).
-- **Wdrożenie (3x6):** `npm run test:e2e` zielone z kluczem; `npm audit` przejrzany i zaakceptowany (D4b).
+- **Etap:** DoD etapu.
+- **Wdrożenie:** `npm run test:e2e` zielone z kluczem; `npm audit` przejrzany i zaakceptowany (D4b).
 - **Wartość testu:** nazywa zachowanie z PRD/ap5/ap7 albo gałąź błędu; czerwony wynik wskazuje konkretną regresję;
   nie zależy od czasu, strefy czasowej, losowości ani sieci bez jawnej kontroli; nie sprawdza klas CSS ani struktury DOM
   poza rolami i `data-testid`.
@@ -305,16 +305,16 @@ Od 3x2 każda nowa funkcjonalność dostaje testy w tym samym commicie, gdy ma s
 
 Maintainer: decyduje o zakresie i priorytetach, przegląda testy, uruchamia smoke (klucz OpenRouter po jego stronie).
 Claude Code: pisze testy wg tego planu i `.claude/rules/testing.md`, uruchamia `npm test`/`npm run lint` przed
-każdym commitem, raportuje paczkami. CI (od 3x5): strażnik bramek PR.
+każdym commitem, raportuje paczkami. CI: strażnik bramek PR.
 
 ## 10. Raportowanie błędów
 
-W trakcie kursu: defekt znaleziony przez test lub smoke trafia do `sketch/triage-inwentarz.md` (grupa A dla kodu,
+Defekt znaleziony przez test lub smoke trafia do `sketch/triage-inwentarz.md` (grupa A dla kodu,
 B dla rozjazdów spec) z decyzją i hashem naprawy; test, który go wykrył, zostaje jako regresyjny. Po publikacji repo:
 GitHub Issues z krokami, wynikiem oczekiwanym i faktycznym oraz środowiskiem. Czerwony test blokuje commit —
 naprawa albo świadoma zmiana testu z uzasadnieniem w commicie.
 
 ## 11. Utrzymanie planu
 
-Aktualizacja przy każdej lekcji, która zmienia poziomy testów (3x3: §4.5 i §5 E2E; 3x4: P4 → wykonane; 3x5: §5 CI).
+Aktualizacja przy każdym etapie, który zmienia poziomy testów (E2E: §4.5 i §5; refaktoryzacja: P4 → wykonane; CI: §5).
 Liczby z §3 i §4.4 odświeżać po każdym pełnym smoke.

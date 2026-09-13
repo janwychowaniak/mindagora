@@ -8,7 +8,7 @@ Historyjki: US-014, US-015 (wejście), US-016, US-017, US-018, US-019 (powrót z
 
 ## 2. Routing widoku
 
-`src/pages/index.astro` — za sesją i bramką onboardingu (już jest). Zastępuje placeholder z 3x1.
+`src/pages/index.astro` — za sesją i bramką onboardingu (już jest). Zastępuje placeholder z etapu auth.
 
 ## 3. Struktura komponentów
 

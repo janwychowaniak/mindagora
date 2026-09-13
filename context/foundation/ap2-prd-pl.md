@@ -38,7 +38,7 @@ Konsekwencje: Spowolnienie pracy, frustracja, ryzyko błędów przy kopiowaniu k
 - Wylogowanie użytkownika
 - Email verification: disabled w local dev, standard na produkcji
 - Display email użytkownika w Account Settings (read-only)
-- Zasięg ochrony (decyzja 2026-09-12, lekcja 3x1): CAŁA aplikacja wymaga zalogowania. Publiczne są wyłącznie strona logowania (`/login`), strona rejestracji (`/register`) i ich endpointy API. Każda inna strona otwarta bez sesji przekierowuje na `/login`; każdy inny endpoint API bez sesji odpowiada `401`. Zalogowany użytkownik wchodzący na `/login` lub `/register` jest przekierowywany do aplikacji.
+- Zasięg ochrony (decyzja 2026-09-12, etap auth): CAŁA aplikacja wymaga zalogowania. Publiczne są wyłącznie strona logowania (`/login`), strona rejestracji (`/register`) i ich endpointy API. Każda inna strona otwarta bez sesji przekierowuje na `/login`; każdy inny endpoint API bez sesji odpowiada `401`. Zalogowany użytkownik wchodzący na `/login` lub `/register` jest przekierowywany do aplikacji.
 - Model sesji (decyzja 2026-09-12, E3): sesja przeglądarkowa w cookies httpOnly zarządzanych wyłącznie po stronie serwera (`@supabase/ssr`); strony renderowane server-side znają użytkownika już przy renderze. API przyjmuje dodatkowo token w nagłówku `Authorization: Bearer` (klienci nieprzeglądarkowi, testy). Szczegóły: plan API (ap5 §3) i specyfikacja auth (ap6).
 - Po rejestracji: gdy weryfikacja e-mail jest wyłączona (local dev), użytkownik jest od razu zalogowany i trafia do onboardingu; gdy włączona (produkcja), widzi komunikat o wysłanym linku potwierdzającym i loguje się po potwierdzeniu (link prowadzi na `/login`).
 
@@ -47,7 +47,7 @@ Konsekwencje: Spowolnienie pracy, frustracja, ryzyko błędów przy kopiowaniu k
 - Guided setup dla nowego użytkownika: rejestracja/login → klucz OpenRouter → minimum 2 uczestników AI
 - Resume onboarding przy przerwaniu (check: czy ma klucz API + czy ma minimum 2 uczestników)
 - Wracający użytkownik z kompletnym setupem trafia bezpośrednio do głównego widoku
-- Mapa tras i bramkowanie (decyzja 2026-09-12, lekcja 2x5): `/onboarding` (jedna strona, krok wyliczany server-side: brak klucza → krok 1, mniej niż 2 uczestników → krok 2, setup kompletny → przekierowanie do `/`), `/` (lista konwersacji), `/conversations/new` (szkic), `/conversations/:id` (czat), `/settings`. Strony `/` i `/conversations/*` przekierowują do `/onboarding` przy niekompletnym setupie; `/settings` jest dostępne zawsze po zalogowaniu (tam naprawia się klucz). Szczegóły: plan UI (ap7 §4)
+- Mapa tras i bramkowanie (decyzja 2026-09-12, etap UI): `/onboarding` (jedna strona, krok wyliczany server-side: brak klucza → krok 1, mniej niż 2 uczestników → krok 2, setup kompletny → przekierowanie do `/`), `/` (lista konwersacji), `/conversations/new` (szkic), `/conversations/:id` (czat), `/settings`. Strony `/` i `/conversations/*` przekierowują do `/onboarding` przy niekompletnym setupie; `/settings` jest dostępne zawsze po zalogowaniu (tam naprawia się klucz). Szczegóły: plan UI (ap7 §4)
 
 ### 3.3. Zarządzanie kluczem OpenRouter API
 
@@ -64,7 +64,7 @@ Konsekwencje: Spowolnienie pracy, frustracja, ryzyko błędów przy kopiowaniu k
   - Alias: unique per user, max 30 znaków, alfanumeryczne + spacje + podstawowe znaki specjalne (-, _, .), co najmniej jeden znak alfanumeryczny (aliasy w rodzaju "___" lub "..." są odrzucane)
   - Model ID: dropdown z listy załadowanej z OpenRouter API
   - Kolor: losowany przez frontend przy tworzeniu (random w MVP) i wysyłany w żądaniu; API wymaga koloru i waliduje format #RRGGBB
-- Delete uczestnika AI (hard delete z bazy) po potwierdzeniu w dialogu "Delete participant '[alias]'?" (decyzja 2026-09-12, lekcja 2x5: operacja równie nieodwracalna jak usunięcie konwersacji; dialog informuje, że wiadomości uczestnika zostają jako "(Deleted Participant)")
+- Delete uczestnika AI (hard delete z bazy) po potwierdzeniu w dialogu "Delete participant '[alias]'?" (decyzja 2026-09-12, etap UI: operacja równie nieodwracalna jak usunięcie konwersacji; dialog informuje, że wiadomości uczestnika zostają jako "(Deleted Participant)")
 - Brak Edit uczestnika w MVP
 - Możliwość wielu uczestników z tym samym modelem ale różnymi aliasami
 - Minimum 2 uczestników wymagane do rozpoczęcia konwersacji
@@ -96,7 +96,7 @@ Konsekwencje: Spowolnienie pracy, frustracja, ryzyko błędów przy kopiowaniu k
   - Dropdown wyboru uczestnika przy KAŻDEJ wiadomości (wymuszony świadomy wybór, sortowanie alfabetyczne po aliasie)
   - Dropdown disabled jeśli użytkownik ma <2 uczestników (tooltip: "Add at least 2 AI participants in Settings")
   - Przycisk Send disabled gdy input pusty lub tylko whitespace
-  - Klawisze kompozytora (decyzja 2026-09-12, lekcja 2x5): Enter wysyła wiadomość na tych samych warunkach co przycisk Send (tekst niepusty, uczestnik wybrany, brak trwającej wysyłki); Shift+Enter wstawia nową linię; podpowiedź pod polem; wpisywanie przez IME (kompozycja) nie wysyła
+  - Klawisze kompozytora (decyzja 2026-09-12, etap UI): Enter wysyła wiadomość na tych samych warunkach co przycisk Send (tekst niepusty, uczestnik wybrany, brak trwającej wysyłki); Shift+Enter wstawia nową linię; podpowiedź pod polem; wpisywanie przez IME (kompozycja) nie wysyła
   - Max 10,000 znaków wiadomości
   - Character counter widoczny od 9000 znaków
   - Zablokowanie input box + dropdown podczas oczekiwania na odpowiedź AI
@@ -149,7 +149,7 @@ Konsekwencje: Spowolnienie pracy, frustracja, ryzyko błędów przy kopiowaniu k
 - Real-time collaboration
 - Search w konwersacjach
 - Zmiana hasła w aplikacji
-- Odzyskiwanie hasła (forgot/reset password) — decyzja 2026-09-12 (B21, lekcja 3x1): poza MVP; na etapie kursu konto odzyskuje się przez panel Supabase; kandydat na V2 po skonfigurowaniu wysyłki e-mail na produkcji
+- Odzyskiwanie hasła (forgot/reset password) — decyzja 2026-09-12 (B21, etap auth): poza MVP; na tym etapie konto odzyskuje się przez panel Supabase; kandydat na V2 po skonfigurowaniu wysyłki e-mail na produkcji
 - Delete account w aplikacji
 - Parsowanie @mentions dla wyboru adresata
 

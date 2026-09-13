@@ -8,10 +8,9 @@
 >
 > Last updated: 2026-09-13
 
-Provenance. This file was written on 2026-09-13 for an application whose test base already existed: the unit
-suite, the API smoke suite, the Playwright scenarios and the CI gates shipped during 10xDevs 2.0 (lessons 3x2, 3x3,
-3x5 and 3x6). The detailed plan behind them is `ap8-test-plan-pl.md` (Polish: levels, candidates, scenario tables,
-environment). This file is the risk-first layer over it, following the 10xDevs 3.0 test-plan schema. Rollout
+Provenance. This file was written for an application whose test base already existed: the unit suite, the API
+smoke suite, the Playwright scenarios and the CI gates. The detailed plan behind them is `ap8-test-plan-pl.md`
+(Polish: levels, candidates, scenario tables, environment). This file is the risk-first layer over it. Rollout
 phases in §3 that shipped before this file existed are marked `complete` and carry no change folder.
 
 ## 1. Strategy
@@ -31,10 +30,13 @@ Tests follow three non-negotiable principles for this project:
    research step of each rollout phase. If the plan and research disagree about where a failure lives, research is
    the ground truth.
 
-Hot-spot scope used for likelihood weighting: `src/lib/services` (22 commits over the life of the repository, the
-top directory), `src/components/auth` (12 commits in the last 30 days), `src/components/chat` (11 commits in the
-last 30 days), `src/lib` (10 commits in the last 30 days). 81 of the repository's 112 commits landed in the last
-30 days, so churn is high everywhere; the ordering above still holds.
+Hot-spot scope used for likelihood weighting:
+
+- `src/lib/services` (22 commits over the life of the repository, the top directory),
+- `src/components/auth` (12 commits in the last 30 days),
+- `src/components/chat` (11 commits in the last 30 days),
+- `src/lib` (10 commits in the last 30 days).
+  81 of the repository's 112 commits landed in the last 30 days, so churn is high everywhere; the ordering above still holds.
 
 ## 2. Risk Map
 
@@ -71,15 +73,15 @@ test; they are deliberately absent from the map.
 
 Each row is a discrete rollout phase that will open its own change folder via `/10x-new`. Status moves
 left-to-right through the values below; the orchestrator updates Status as artifacts appear on disk. Phases 1–4
-shipped before this plan existed (10xDevs 2.0 lessons), so they are `complete` without a change folder.
+shipped before this plan existed, so they are `complete` without a change folder.
 
-| #   | Phase name                       | Goal (one line)                                                                                                                                                                              | Risks covered      | Test types         | Status      | Change folder                         |
-| --- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------------ | ----------- | ------------------------------------- |
-| 1   | Unit foundation                  | Cheapest signal on gates, error mapping, the composer and the validators                                                                                                                     | #3, #4, #5, #6, #7 | unit               | complete    | — (lesson 3x2, 2026-09-12)            |
-| 2   | API smoke on the real stack      | Contracts, ownership and database actions against local Supabase and the real OpenRouter                                                                                                     | #2, #3, #4, #7     | integration        | complete    | — (lessons 2x4–3x1; `scripts/smoke/`) |
-| 3   | E2E on critical flows            | Sign-in, onboarding, one full multi-participant conversation, the list                                                                                                                       | #1, #3, #5         | e2e                | complete    | — (lesson 3x3)                        |
-| 4   | Quality-gates wiring             | Lint, types, unit, e2e and build on every pull request; release behind an approval gate                                                                                                      | cross-cutting      | gates              | complete    | — (lessons 3x5, 3x6)                  |
-| 5   | Full-context seam and smoke gaps | Extract a pure seam for the message-history assembly and unit-test it; close the smoke gaps (send to a deleted participant → 404, `updated_at` after an exchange, `Cache-Control` on errors) | #1, #2, #4         | unit + integration | not started | —                                     |
+| #   | Phase name                       | Goal (one line)                                                                                                                                                                              | Risks covered      | Test types         | Status      | Change folder        |
+| --- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ | ------------------ | ----------- | -------------------- |
+| 1   | Unit foundation                  | Cheapest signal on gates, error mapping, the composer and the validators                                                                                                                     | #3, #4, #5, #6, #7 | unit               | complete    | —                    |
+| 2   | API smoke on the real stack      | Contracts, ownership and database actions against local Supabase and the real OpenRouter                                                                                                     | #2, #3, #4, #7     | integration        | complete    | — (`scripts/smoke/`) |
+| 3   | E2E on critical flows            | Sign-in, onboarding, one full multi-participant conversation, the list                                                                                                                       | #1, #3, #5         | e2e                | complete    | —                    |
+| 4   | Quality-gates wiring             | Lint, types, unit, e2e and build on every pull request; release behind an approval gate                                                                                                      | cross-cutting      | gates              | complete    | —                    |
+| 5   | Full-context seam and smoke gaps | Extract a pure seam for the message-history assembly and unit-test it; close the smoke gaps (send to a deleted participant → 404, `updated_at` after an exchange, `Cache-Control` on errors) | #1, #2, #4         | unit + integration | not started | —                    |
 
 ## 4. Stack
 
@@ -212,7 +214,7 @@ respect these unless the underlying assumption changes.
 - **Astro page rendering in Vitest** — pages are covered by e2e. Re-evaluate if a page grows logic of its own.
 - **Performance and load** — a single-user MVP. Re-evaluate at the first multi-user deployment.
 - **Accessibility audit, visual snapshots, coverage thresholds** — not for the MVP; snapshots are brittle with
-  Tailwind. Re-evaluate in 10xDevs 3.0 module 3 (multimodal scenarios).
+  Tailwind. Re-evaluate when multimodal review tooling is adopted.
 - **AI-native layers (post-edit hooks, vision review in CI)** — cost × signal does not justify them for one
   maintainer. Re-evaluate together with the accessibility audit.
 
@@ -226,5 +228,5 @@ Refresh (`/10x-test-plan --refresh`) when:
 
 - a new top-3 risk surfaces from the roadmap, the decision inventory or a production incident,
 - a recommended tool's version is older than three months,
-- the project's tech stack changes (major upgrades of Astro, Zod or Vitest are planned after certification),
+- the project's tech stack changes (major upgrades of Astro, Zod or Vitest are planned),
 - §7 negative space no longer matches what the maintainer believes.

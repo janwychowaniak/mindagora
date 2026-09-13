@@ -1,10 +1,10 @@
 # Analiza hostingu MindAgora (ap9)
 
-Stan: 2026-09-12, lekcja 3x6 (Wdrożenie na produkcję). Analiza wg promptu kursu `prompty/3x6/hosting-analysis.pl.md`,
+Stan: 2026-09-12 (wdrożenie na produkcję). Analiza wg promptu `hosting-analysis`,
 z planami i cenami zweryfikowanymi 2026-09-12 w dokumentacji dostawców (WebFetch/WebSearch; źródła w §7). Powiązane:
-stack (ap3), brief `sketch/lekcje/3x6-brief.md` (T2 hosting, T4 Supabase, T7 obraz, T8 bramka, T9 URL-e, T10 sekrety),
+stack (ap3), notatka wdrożeniowa (T2 hosting, T4 Supabase, T7 obraz, T8 bramka, T9 URL-e, T10 sekrety),
 inwentarz (`sketch/triage-inwentarz.md`). Dokument uzasadnia wybór hostingu; implementacji (Dockerfile, `master.yml`)
-nie opisuje. Założenia przyjęte z briefu, nie kwestionowane tutaj: artefakt = obraz `node:24-alpine` na publicznym
+nie opisuje. Założenia przyjęte wcześniej, nie kwestionowane tutaj: artefakt = obraz `node:24-alpine` na publicznym
 GHCR, job `deploy` za bramką środowiska `production`; domena `mindagora.ai` w Cloudflare (Registrar + DNS).
 
 Legenda oznaczeń: **[✓]** zweryfikowane w dokumentacji dostawcy 2026-09-12; **[~]** tylko źródło pośrednie (zestawienia
@@ -48,7 +48,7 @@ artefaktem wdrożenia (cały ustalony pipeline GHCR staje się zbędny).
    `sharp`, sesje Astro w KV) [✓ docs adaptera]. Free: 100 k req/dzień, **10 ms CPU/request** (SSR React może to
    przekraczać) [✓]; Paid 5 USD/mies.: 30 s CPU domyślnie (do 5 min) [✓]. **Brak limitu czasu ściennego** dla requestu
    HTTP — czekanie na `fetch` do OpenRoutera nie liczy się do CPU [✓]. Domena `mindagora.ai` „w domu”. Użytek
-   komercyjny na Free dozwolony [~]. To jest ścieżka autora kursu (Pages 9/10 w 04.2025; od 2025 nowe projekty → Workers).
+   komercyjny na Free dozwolony [~]. To była ścieżka referencyjna (Pages 9/10 w 04.2025; od 2025 nowe projekty → Workers).
 
 ## 3. Platformy alternatywne (konteneryzacja)
 
@@ -75,7 +75,7 @@ Kandydaci: obraz `node:24-alpine` z GHCR, jedna mała instancja (256–512 MB), 
 | Railway               | tak (CNAME + TXT, certy auto) [✓]                                   | brak klauzuli zakazu w docs; ToS [?]                                | EU West (Amsterdam) [✓]                             | `railway redeploy --service … --yes` z `RAILWAY_TOKEN` [✓]; GHCR natywnie jako źródło usługi [✓]                             | Free 1 USD/mies. nie utrzyma stałej instancji → realnie Hobby 5 USD                     |
 | Koyeb                 | 10 domen free [✓ stare docs]                                        | —                                                                   | Frankfurt [✓]                                       | `koyeb/action-git-deploy@v1` (wejście `docker`) [✓]                                                                          | odpada: brak planu w budżecie dla nowych kont                                           |
 | Fly.io                | 10 certów free [✓]                                                  | tak (pay-as-you-go)                                                 | ams, fra, cdg, arn, lhr; brak `waw` [✓]             | `superfly/flyctl-actions/setup-flyctl@master` + `flyctl deploy --image ghcr.io/…` [✓]                                        | karta wymagana; 60 s idle to realne ryzyko przy 30–60 s ciszy                           |
-| DigitalOcean          | tak (standard oferty) [~]                                           | tak (płatny)                                                        | AMS, FRA [✓]                                        | `digitalocean/action-doctl@v2` + `doctl apps create-deployment` [✓]; GHCR publiczne [✓], bez autodeployu z GHCR [✓]          | fallback 1:1 z kursem; + VAT                                                            |
+| DigitalOcean          | tak (standard oferty) [~]                                           | tak (płatny)                                                        | AMS, FRA [✓]                                        | `digitalocean/action-doctl@v2` + `doctl apps create-deployment` [✓]; GHCR publiczne [✓], bez autodeployu z GHCR [✓]          | fallback referencyjny; + VAT                                                            |
 | Cloudflare Containers | tak, domena w tym samym koncie                                      | tak                                                                 | placement: region/jurysdykcja `eu` (od 04.2026) [✓] | `cloudflare/wrangler-action@v4` [✓]; **GHCR nieobsługiwane** — `docker pull` + `wrangler containers push` do rejestru CF [✓] | wymaga własnego Workera (klasa Container) — dodatkowy kod; GA na Workers Paid [✓]       |
 | Hetzner               | Caddy (Let's Encrypt) — własnoręcznie                               | tak                                                                 | Norymberga, Falkenstein, Helsinki [✓]               | SSH (`appleboy/ssh-action`, nieoficjalna) lub Watchtower; `docker compose pull`                                              | pełny DIY: system, aktualizacje, firewall; ceny +30–40 % (06.2026) [✓]                  |
 | Google Cloud Run      | domain mapping = **preview, „not production-ready”** [✓]; LB płatny | tak                                                                 | europe-west1 i inne [✓]                             | `google-github-actions/deploy-cloudrun` + WIF [?]; GHCR publiczne bezpośrednio [✓]                                           | najwięcej konfiguracji (projekt GCP, IAM, billing)                                      |
@@ -91,7 +91,7 @@ Kandydaci: obraz `node:24-alpine` z GHCR, jedna mała instancja (256–512 MB), 
 
 Poza finałem: Koyeb odpadł przez zamknięcie Starter dla nowych kont (Mistral, 02.2026); Fly.io przez 60 s idle-timeout
 dokładnie na profilu naszych requestów; DigitalOcean spełnia wszystko, ale bez free i z limitem 100 s (przy 60 s to
-mało zapasu) — zostaje jako fallback 1:1 z kursem; Cloudflare Containers przez brak GHCR i konieczność napisania
+mało zapasu) — zostaje jako fallback referencyjny; Cloudflare Containers przez brak GHCR i konieczność napisania
 Workera-routera (wraca, gdy będziemy chcieli mieć wszystko w jednym koncie z domeną); Hetzner przez niedostępność CX23,
 wzrost cen i koszt operacyjny DIY; Cloud Run przez nieprodukcyjny status domain mappingu i narzut konfiguracji GCP.
 
@@ -133,25 +133,25 @@ Brak klauzuli niekomercyjnej w docs, ToS nie sprawdzono.
 
 ## 5. Oceny (0–10; 10 = bezpośrednia rekomendacja dla MindAgory w obecnym kształcie)
 
-| Platforma                 | Ocena | Powody                                                                                                          |
-| ------------------------- | ----- | --------------------------------------------------------------------------------------------------------------- |
-| Render (Free)             | **8** | spełnia (a)–(e) za 0 USD bez zmian w aplikacji; −1 usypianie/budzenie ~1 min, −1 nieznany timeout i 0,1 CPU     |
-| Railway (Hobby)           | **7** | najlepszy runtime (GHCR, EU, bez usypiania, 5 min); −2 koszt 5–6 USD przy dostępnej opcji za 0, −1 usage-based  |
-| DigitalOcean App Platform | 6     | 1:1 z kursem, GHCR, `doctl`; −2 brak free, −1 limit 100 s blisko naszych 60 s, −1 bez autodeployu z GHCR        |
-| Cloudflare Containers     | 6     | 5 USD, domena w domu, EU placement, bez limitu czasu; −2 GHCR → re-push do rejestru CF, −2 własny Worker-router |
-| Cloudflare Workers        | 5     | tanio, bez limitu ściennego, domena w domu; −3 wymiana adaptera i runtime ≠ Node, −2 obraz GHCR bez użycia      |
-| Fly.io                    | 5     | ~2 USD, `--image` z GHCR, EU; −3 60 s idle-timeout na profilu naszych requestów, −2 brak free, karta            |
-| Hetzner VPS               | 5     | pełna kontrola, brak limitów; −2 CX23 niedostępny i ceny w górę, −3 DIY (OS, Caddy, deploy przez SSH)           |
-| Google Cloud Run          | 5     | realny free tier, GHCR bezpośrednio, 60 min; −3 domena (mapping preview / LB płatny), −2 narzut GCP i billing   |
-| Netlify                   | 4     | free z komercją; −3 wymiana adaptera, −3 twardy limit 60 s = nasz czas odpowiedzi modelu                        |
-| Vercel                    | 4     | 300 s, preview per PR; −3 wymiana adaptera, −3 Hobby niekomercyjny → 20 USD/mies.                               |
-| Koyeb                     | 3     | technicznie dobry (free 512 MB, FRA, akcja GHA); −7 Starter zamknięty dla nowych, Pro 29 USD                    |
+| Platforma                 | Ocena | Powody                                                                                                           |
+| ------------------------- | ----- | ---------------------------------------------------------------------------------------------------------------- |
+| Render (Free)             | **8** | spełnia (a)–(e) za 0 USD bez zmian w aplikacji; −1 usypianie/budzenie ~1 min, −1 nieznany timeout i 0,1 CPU      |
+| Railway (Hobby)           | **7** | najlepszy runtime (GHCR, EU, bez usypiania, 5 min); −2 koszt 5–6 USD przy dostępnej opcji za 0, −1 usage-based   |
+| DigitalOcean App Platform | 6     | wariant referencyjny, GHCR, `doctl`; −2 brak free, −1 limit 100 s blisko naszych 60 s, −1 bez autodeployu z GHCR |
+| Cloudflare Containers     | 6     | 5 USD, domena w domu, EU placement, bez limitu czasu; −2 GHCR → re-push do rejestru CF, −2 własny Worker-router  |
+| Cloudflare Workers        | 5     | tanio, bez limitu ściennego, domena w domu; −3 wymiana adaptera i runtime ≠ Node, −2 obraz GHCR bez użycia       |
+| Fly.io                    | 5     | ~2 USD, `--image` z GHCR, EU; −3 60 s idle-timeout na profilu naszych requestów, −2 brak free, karta             |
+| Hetzner VPS               | 5     | pełna kontrola, brak limitów; −2 CX23 niedostępny i ceny w górę, −3 DIY (OS, Caddy, deploy przez SSH)            |
+| Google Cloud Run          | 5     | realny free tier, GHCR bezpośrednio, 60 min; −3 domena (mapping preview / LB płatny), −2 narzut GCP i billing    |
+| Netlify                   | 4     | free z komercją; −3 wymiana adaptera, −3 twardy limit 60 s = nasz czas odpowiedzi modelu                         |
+| Vercel                    | 4     | 300 s, preview per PR; −3 wymiana adaptera, −3 Hobby niekomercyjny → 20 USD/mies.                                |
+| Koyeb                     | 3     | technicznie dobry (free 512 MB, FRA, akcja GHA); −7 Starter zamknięty dla nowych, Pro 29 USD                     |
 
 ## 6. Rekomendacja dla MindAgory
 
 **Teraz: Render, instancja Free, region Frankfurt. Plan B: Railway Hobby (5 USD).** Obraz jest ten sam — zmiana platformy
 to nowa usługa, te same env i inny krok `deploy` (poniżej), bez dotykania aplikacji. DigitalOcean zostaje fallbackiem
-1:1 z kursem, gdyby oba zawiodły.
+wariant referencyjny, gdyby oba zawiodły.
 
 **Krok `deploy` w `master.yml` (Render):** job `deploy` z `needs: [image]`, `environment: production` (required
 reviewers, T8), jeden krok `curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL?imgURL=ghcr.io/<owner>/mindagora:${GITHUB_SHA}"`
@@ -165,7 +165,7 @@ na koncie:** czy formularz pozwala wybrać Free dla usługi z obrazu i Frankfurt
 
 **Zmienne:** Environment usługi: `SUPABASE_URL`, `SUPABASE_KEY` (anon prod), `OPENROUTER_HTTP_REFERER=https://mindagora.ai`,
 `OPENROUTER_X_TITLE`; `HOST=0.0.0.0` w obrazie (T7); `PORT` wstrzykuje Render — adapter Node czyta go z env. Health check:
-`GET /login`. Warunek wstępny spełniony przez `astro:env` (T1 w briefie §9.1: `import.meta.env` nie działa w runtime
+`GET /login`. Warunek wstępny spełniony przez `astro:env` (T1: `import.meta.env` nie działa w runtime
 kontenera).
 
 **Domena `mindagora.ai` (Cloudflare DNS):** w Render dodać `mindagora.ai` i `www.mindagora.ai` (2 domeny w Hobby [✓]);
@@ -191,7 +191,7 @@ plan B 5–6 USD; DO 5 USD + VAT. Zgodne z ap3 („DigitalOcean via Docker”) w
 wymienny; README/ap3 do aktualizacji po wdrożeniu.
 
 **Preview per PR (później):** Render wymaga Pro; Railway ma środowiska/PR environments [?]; dla solo-dewelopera z E2E na
-lokalnym stosie w CI (3x5) nie jest to potrzebne w 2026.
+lokalnym stosie w CI nie jest to potrzebne w 2026.
 
 ## 6a. Decyzja użytkownika (2026-09-12) — kryterium zmienione: portfolio, zawsze włączone
 
@@ -206,7 +206,7 @@ czyli 1 USD kredytu planu Free starcza na ~pół miesiąca — Free bez usypiani
 w kredycie. Krok `deploy` w `master.yml`: `npx -y @railway/cli@latest redeploy --service <id> --yes` z `RAILWAY_TOKEN`
 jako sekretem środowiska `production` (zamiast Deploy Hooka Rendera z §6).
 
-## 7. Źródła (sprawdzone 2026-09-12) i co się zmieniło od kursu (04.2025)
+## 7. Źródła (sprawdzone 2026-09-12) i co się zmieniło od 04.2025
 
 - https://render.com/docs/free — Free: 750 h/mies., usypianie po 15 min, budzenie ~1 min, własne domeny i TLS na Free.
 - https://render.com/docs/deploying-an-image — publiczny obraz z dowolnego rejestru, redeploy przez hook `imgURL`,

@@ -32,4 +32,4 @@ _Starter recommendations from the 10x-astro-starter rules, carried over verbatim
 - Runtime configuration goes through `astro:env`, not `import.meta.env`: the schema lives in `astro.config.mjs` (`env.schema`,
   every variable a server secret), modules import the values from `astro:env/server`, and the Node adapter reads them from
   the process environment when the server starts. Vite inlines private `import.meta.env` values at build time, which
-  a container image built once cannot afford (lesson 3x6, 2026-09-12). `import.meta.env.PROD` stays: a build-time flag by design.
+  a container image built once cannot afford (2026-09-12). `import.meta.env.PROD` stays: a build-time flag by design.

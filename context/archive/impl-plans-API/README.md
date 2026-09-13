@@ -1,6 +1,6 @@
 # Plany implementacji endpointów — artefakty historyczne
 
-Katalog zawiera plany implementacji 12 endpointów REST API MindAgora (styczeń–luty 2026) oraz notatkę
+Katalog zawiera plany implementacji 12 endpointów REST API MindAgora oraz notatkę
 „Uwagi implementacyjne do planów EP.md". Plany były generowane per endpoint (Planer: GPT-5.2-XHigh, z szablonu
 `sketch/making-IMPL-PLANS-api/make-PLAN-implementacji-epa-api_0szablon.md`), recenzowane w claude.ai
 (wzorzec promptu: `sketch/making-IMPL-PLANS-api/0-Mamy.md`), poprawiane i wykonane.

@@ -1,13 +1,13 @@
 # Architektura UI dla MindAgora (ap7)
 
-Stan: 2026-09-12, lekcja 2x5 (Zad. 2 i 3). Źródło prawdy razem z kodem (`src/pages/*.astro`, `src/components/**`,
+Stan: 2026-09-12. Źródło prawdy razem z kodem (`src/pages/*.astro`, `src/components/**`,
 `src/lib/api-client.ts`) oraz PRD (ap2 §3.2–3.8, US-004…US-036), planem API (ap5) i regułą `.claude/rules/frontend.md`.
 Plany implementacji poszczególnych widoków: `specs_ai/impl-plans-UI/`. Dokument opisuje strukturę, przepływy
 i kontrakty między widokami a API, nie implementację.
 
-## 0. Decyzje sesji planistycznej (2026-09-12, brief 2x5 §8)
+## 0. Decyzje sesji planistycznej (2026-09-12)
 
-1. Sesja UI-1 zastąpiona jedną rundą pytań o luki w PRD (brief §8); PRD i `frontend.md` przesądzały resztę.
+1. Sesja UI-1 zastąpiona jedną rundą pytań o luki w PRD; PRD i `frontend.md` przesądzały resztę.
 2. Mapa tras: `/login`, `/register`, `/onboarding` (jedna strona, krok wyliczany server-side), `/` (lista),
    `/conversations/new`, `/conversations/:id`, `/settings`.
 3. Bramkowanie onboardingu na `/` i `/conversations/*` (przekierowanie do `/onboarding` przy niekompletnym setupie);
@@ -20,7 +20,7 @@ i kontrakty między widokami a API, nie implementację.
 7. **Kompozytor: Enter wysyła, Shift+Enter wstawia nową linię** (decyzja użytkownika 2026-09-12, wpis w PRD §3.6
    i §4.1); przycisk Send zostaje; osłona `isComposing` dla IME; podpowiedź pod polem.
 8. Usuwanie uczestnika z dialogiem potwierdzenia, tak samo jak konwersacji (wpis w PRD US-011).
-9. `data-testid` na kluczowych elementach od razu (pod E2E w 3x3).
+9. `data-testid` na kluczowych elementach od razu (pod E2E).
 10. Kolejność implementacji: ustawienia → onboarding → lista → czat.
 11. Responsywność: desktop-first; przy ~400 px jedna kolumna, bez rozjazdu; bez nawigacji mobilnej.
 12. Bez View Transitions (`ClientRouter`) w MVP.
@@ -38,7 +38,7 @@ i kontrakty między widokami a API, nie implementację.
   Jedna wyspa na widok (`SettingsView`, `OnboardingView`, `ConversationListView`, `ChatView`) plus komponenty dzieci.
 - **Jeden klient HTTP** `src/lib/api-client.ts`: `fetch` JSON same-origin, typy z `types.ts`, wspólne rozgałęzienie
   po statusie: `401` → `window.location.assign("/login")`; `412` → `window.location.assign("/settings?notice=api-key")`;
-  pozostałe statusy wracają do widoku jako `ApiFailure { status, error, details }`. Helpery auth z 3x1 (`auth-api.ts`)
+  pozostałe statusy wracają do widoku jako `ApiFailure { status, error, details }`. Helpery auth z etapu auth (`auth-api.ts`)
   przechodzą do tego modułu.
 - **Stan**: `useState`/`useReducer` w wyspie + hook per widok (`useConversations`, `useConversation`,
   `useParticipants`, `useModels`) w `src/components/hooks/`. Bez globalnego store'a; nic nie jest współdzielone
@@ -55,11 +55,11 @@ i kontrakty między widokami a API, nie implementację.
 
 ## 2. Lista widoków
 
-### 2.1. Logowanie — `/login` (zrobione w 3x1)
+### 2.1. Logowanie — `/login` (zrobione w etapie auth)
 
 Publiczny; zalogowany → `/`. `LoginForm`. Szczegóły: ap6.
 
-### 2.2. Rejestracja — `/register` (zrobione w 3x1)
+### 2.2. Rejestracja — `/register` (zrobione w etapie auth)
 
 Publiczny; zalogowany → `/`. `RegisterForm`. Szczegóły: ap6.
 
@@ -159,7 +159,7 @@ dialog „Network error - check your connection."; `404` konwersacji → karta �
 ## 4. Układ i struktura nawigacji
 
 - **Nagłówek (`Layout.astro`, tryb auth):** logo/„MindAgora" → `/`, linki „Conversations" (`/`), „Settings"
-  (`/settings`), „Help" (README, nowa karta), przycisk „Logout" (wyspa z 3x1). Aktywny link z `aria-current="page"`.
+  (`/settings`), „Help" (README, nowa karta), przycisk „Logout" (wyspa z etapu auth). Aktywny link z `aria-current="page"`.
   W trybie non-auth tylko logo.
 - **Nawigacja wewnątrz czatu:** „← List" → `/` (pełna nawigacja; lista odzwierciedla `updated_at` i licznik,
   US-019). Tytuł w czacie nieedytowalny (edycja tylko na liście, PRD §3.5).
@@ -211,9 +211,9 @@ Hooki: `useApiKey`, `useParticipants`, `useModels`.
 `pending-reply`, `api-key-input`, `api-key-toggle`, `api-key-save`, `participant-alias-input`, `model-combobox`,
 `model-option`, `participant-add`, `participant-item`, `participant-delete`, `confirm-dialog-confirm`,
 `confirm-dialog-cancel`, `error-dialog-ok`, `onboarding-continue`, `settings-notice`, `empty-state`.
-Formularze auth (dopisane w 3x3, 2026-09-12): `login-email`, `login-password`, `login-submit`, `login-error`,
+Formularze auth (dopisane w etapie E2E, 2026-09-12): `login-email`, `login-password`, `login-submit`, `login-error`,
 `register-email`, `register-password`, `register-confirm-password`, `register-submit`, `register-error`, `logout-button`.
-Pozostałe z kodu (2x5): `composer`, `message-list`, `pending-reply`, `date-separator`, `char-counter`, `chat-title`,
+Pozostałe z kodu (etap UI): `composer`, `message-list`, `pending-reply`, `date-separator`, `char-counter`, `chat-title`,
 `conversation-not-found`, `participant-option`, `participant-count`, `participant-list`, `participant-list-empty`,
 `api-key-saved`, `account-email`, `conversation-list`.
 
@@ -255,5 +255,5 @@ Pozostałe z kodu (2x5): `composer`, `message-list`, `pending-reply`, `date-sepa
 ## 8. Granice i co dalej
 
 Bez Markdownu w wiadomościach, bez streamingu, bez paginacji, bez edycji uczestników i wiadomości, bez multi-tab
-(PRD §4). Testy jednostkowe komponentów i hooków → 3x2; E2E po `data-testid` → 3x3; nawigacja mobilna, react-hook-form,
-motyw (tweakcn / design system) → 3x4 lub po MVP; deployment → 3x6.
+(PRD §4). Testy jednostkowe komponentów i hooków → osobny etap; E2E po `data-testid` → osobny etap; nawigacja mobilna, react-hook-form,
+motyw (tweakcn / design system) → etap refaktoryzacji lub po MVP; deployment → etap wdrożenia.

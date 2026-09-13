@@ -1,7 +1,7 @@
 # MindAgora
 
 Multi-model chat: one conversation, many AI participants (OpenRouter models), one fully shared context.
-Course project (10xDevs 2.0), MVP live. The maintainer talks to Claude in Polish; everything inside
+Course project (10xDevs), MVP live. The maintainer talks to Claude in Polish; everything inside
 this repository is in English: code, comments, commit messages, docs. The one deliberate exception is `context/`:
 the foundation documents were written in Polish during the course (see `context/README.md`).
 

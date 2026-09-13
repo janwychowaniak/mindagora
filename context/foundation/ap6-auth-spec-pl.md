@@ -1,12 +1,12 @@
 # Specyfikacja architektury uwierzytelniania - MindAgora (ap6)
 
-Stan: 2026-09-12, lekcja 3x1 (Zad. 2). Źródło prawdy razem z kodem (`src/middleware`, `src/pages/api/auth`,
+Stan: 2026-09-12. Źródło prawdy razem z kodem (`src/middleware`, `src/pages/api/auth`,
 `src/lib/services/auth.service.ts`, `src/db/supabase.client.ts`) oraz PRD (ap2 §3.1, US-001…003, US-032/033)
 i planem API (ap5 §2.6, §3, §8.5). Dokument opisuje architekturę i kontrakty, nie implementację.
 
 ## 0. Kontekst i decyzje
 
-- **Co już jest (przed 3x1):** RLS na każdej tabeli, middleware weryfikujący `Authorization: Bearer <JWT>`,
+- **Co już jest (przed etapem auth):** RLS na każdej tabeli, middleware weryfikujący `Authorization: Bearer <JWT>`,
   12 endpointów REST za autoryzacją, `user_settings` tworzone triggerem przy rejestracji, smoke suite curl
   (95 PASS) pozyskująca tokeny bezpośrednio z Supabase Auth.
 - **Czego brakuje:** sesji przeglądarkowej, stron logowania i rejestracji, ochrony tras dla stron Astro,
@@ -18,7 +18,7 @@ i planem API (ap5 §2.6, §3, §8.5). Dokument opisuje architekturę i kontrakty
 - **Zasięg ochrony (PRD §3.1):** cała aplikacja za sesją. Publiczne wyłącznie `/login`, `/register`,
   `POST /api/auth/login`, `POST /api/auth/register` i statyki.
 - **Ścieżki:** `/login`, `/register` (strony); `/api/auth/login`, `/api/auth/register`, `/api/auth/logout` (API).
-  Kursowe `/auth/*` odrzucone: krótsze ścieżki są od dawna w whitelist middleware i w PRD („login page").
+  Ścieżki `/auth/*` odrzucone: krótsze ścieżki są od dawna w whitelist middleware i w PRD („login page").
 - **Bez OAuth, bez magic linków, bez MFA.** E-mail + hasło (min. 6 znaków, `minimum_password_length`).
 - **Weryfikacja e-mail:** wyłączona lokalnie (`enable_confirmations = false`), włączona na produkcji (domyślne
   Supabase). Aplikacja obsługuje oba warianty tym samym kodem (`confirmation_required` w odpowiedzi rejestracji).
@@ -27,11 +27,11 @@ i planem API (ap5 §2.6, §3, §8.5). Dokument opisuje architekturę i kontrakty
 
 ### 1.1. Strony Astro (SSR, `output: "server"`)
 
-| Strona                     | Dostęp                 | Odpowiedzialność                                                                                                                                                            |
-| -------------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/pages/login.astro`    | publiczna              | Jeśli `Astro.locals.user` istnieje → `Astro.redirect("/")`. Renderuje `Layout` (tryb non-auth) i wyspę `LoginForm` (`client:load`). Link „Don't have an account? Register". |
-| `src/pages/register.astro` | publiczna              | Analogicznie z `RegisterForm`. Link „Already have an account? Log in".                                                                                                      |
-| `src/pages/index.astro`    | chroniona (middleware) | W 3x1: placeholder „Signed in as {email}" w `Layout` (tryb auth). Zastąpi go widok listy konwersacji / onboarding z planu UI (lekcja 2x5). Startowy `Welcome.astro` znika.  |
+| Strona                     | Dostęp                 | Odpowiedzialność                                                                                                                                                                |
+| -------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/pages/login.astro`    | publiczna              | Jeśli `Astro.locals.user` istnieje → `Astro.redirect("/")`. Renderuje `Layout` (tryb non-auth) i wyspę `LoginForm` (`client:load`). Link „Don't have an account? Register".     |
+| `src/pages/register.astro` | publiczna              | Analogicznie z `RegisterForm`. Link „Already have an account? Log in".                                                                                                          |
+| `src/pages/index.astro`    | chroniona (middleware) | W etapie auth: placeholder „Signed in as {email}" w `Layout` (tryb auth). Zastąpi go widok listy konwersacji / onboarding z planu UI (etap UI). Startowy `Welcome.astro` znika. |
 
 Strony nie wykonują logiki auth poza redirectem zalogowanego z `/login` i `/register`. Ochrona tras jest
 wyłącznie w middleware (jedno miejsce, uniwersalne dla wszystkich przyszłych stron).
@@ -44,9 +44,9 @@ wyłącznie w middleware (jedno miejsce, uniwersalne dla wszystkich przyszłych 
   `rel="noopener noreferrer"`) i przyciskiem „Logout" (wyspa `LogoutButton`). PRD §3.8, US-003, US-034.
 - Tryb **non-auth** (`user` brak): nagłówek tylko z nazwą aplikacji; bez „Logout".
 - Użytkownik trafia do Layoutu **propsem ze strony** (`Astro.locals.user`), nie przez endpoint „sprawdź sesję" ani
-  store — ta sama korekta, którą autor lekcji wniósł do specyfikacji 10xRules. Strony Astro renderują się
+  store — ta sama korekta, którą wniesiono też do specyfikacji 10xRules. Strony Astro renderują się
   z pełną wiedzą o sesji, więc dodatkowy round-trip byłby zbędny.
-- E-mail w Account Settings (US-033) wchodzi z widokiem ustawień w 2x5; w 3x1 e-mail widać w placeholderze.
+- E-mail w Account Settings (US-033) wchodzi z widokiem ustawień w etapie UI; w etapie auth e-mail widać w placeholderze.
 
 ### 1.3. Komponenty React (wyspy, `src/components/auth/`)
 
@@ -80,7 +80,7 @@ Walidacja client-side jest wyłącznie dla UX; API waliduje zawsze (ap5 §8.2). 
 
 1. **Gość wchodzi na `/`** → middleware: brak Bearer, brak sesji cookie → `302 /login`.
 2. **Logowanie poprawne** → `200` + `Set-Cookie` → przeładowanie `/` → middleware widzi sesję → strona
-   renderuje się z `user`. (Routing onboardingu wg US-002/006 dochodzi w 2x5 na poziomie `index.astro`.)
+   renderuje się z `user`. (Routing onboardingu wg US-002/006 dochodzi w etapie UI na poziomie `index.astro`.)
 3. **Logowanie błędne** → `401`, komunikat inline, pola zachowane.
 4. **Rejestracja lokalnie** → `201`, `confirmation_required = false`, cookies ustawione → `/`.
 5. **Rejestracja na produkcji** → `201`, `confirmation_required = true`, komunikat o e-mailu; link z e-maila
@@ -161,7 +161,7 @@ Serwis nie zna HTTP; mapowanie kodów Supabase (`invalid_credentials`, `email_no
 
 `astro.config.mjs` ma `output: "server"` z adapterem Node — wszystkie strony są renderowane na żądanie,
 więc `Astro.locals`, `Astro.request.headers` i `Astro.cookies` są dostępne bez `prerender = false` na stronach
-(ostrzeżenie z lekcji o `Astro.request.headers` na stronach prerenderowanych nas nie dotyczy). Endpointy API
+(ostrzeżenie o `Astro.request.headers` na stronach prerenderowanych nas nie dotyczy). Endpointy API
 zachowują jawne `export const prerender = false` (konwencja repo).
 
 ## 3. System autentykacji (Supabase Auth + Astro)
@@ -173,7 +173,7 @@ zachowują jawne `export const prerender = false` (konwencja repo).
   - `getAll`: parsowanie nagłówka `Cookie` żądania (`parseCookieHeader` z `@supabase/ssr`).
   - `setAll`: `context.cookies.set(name, value, options)` dla każdego cookie — Astro dokłada `Set-Cookie` do
     odpowiedzi (także przy `redirect`).
-  - Tylko `getAll`/`setAll`; nigdy `get`/`set`/`remove` (asset kursu i dokumentacja `@supabase/ssr`).
+  - Tylko `getAll`/`setAll`; nigdy `get`/`set`/`remove` (dokumentacja `@supabase/ssr`).
 - `cookieOptions`: `path: "/"`, `httpOnly: true`, `sameSite: "lax"`, `secure: import.meta.env.PROD`
   (lokalnie `http://localhost:3000`; odstępstwo od `secure: true` z assetu z komentarzem w kodzie —
   produkcja jest zawsze za HTTPS).
@@ -197,7 +197,7 @@ zachowują jawne `export const prerender = false` (konwencja repo).
 6. **Ścieżka Bearer:** bez cookies; token weryfikowany per żądanie `getUser(token)`; odświeżanie po stronie
    klienta (`/auth/v1/token?grant_type=refresh_token`, jak w notatce użytkownika).
 
-`getClaims()` (weryfikacja lokalna kluczem asymetrycznym, nowość po lekcji) świadomie pominięte: lokalne CLI
+`getClaims()` (weryfikacja lokalna kluczem asymetrycznym, nowsza opcja) świadomie pominięte: lokalne CLI
 podpisuje tokeny kluczem symetrycznym legacy, a round-trip do Auth per żądanie jest akceptowalny w MVP.
 
 ### 3.3. Konfiguracja Supabase
@@ -205,7 +205,7 @@ podpisuje tokeny kluczem symetrycznym legacy, a round-trip do Auth per żądanie
 - Lokalnie (`supabase/config.toml`): `enable_signup = true`, `enable_confirmations = false`,
   `minimum_password_length = 6`, `site_url = http://127.0.0.1:3000`, `jwt_expiry = 3600`, rotacja refresh tokenów,
   `[local_smtp]` (Mailpit) do podglądu maili, gdyby weryfikację włączyć lokalnie.
-- Produkcja (lekcja 3x6): w panelu Supabase ustawić **Site URL** i **Redirect URLs** na adres produkcyjny
+- Produkcja: w panelu Supabase ustawić **Site URL** i **Redirect URLs** na adres produkcyjny
   (inaczej linki potwierdzające prowadzą na `localhost:3000`); zostawić weryfikację e-mail włączoną; wysyłka
   e-mail domyślna Supabase wystarcza do potwierdzeń (limit maili/h — do sprawdzenia przed wdrożeniem).
 - `SUPABASE_SERVICE_ROLE_KEY` nigdzie w ścieżkach użytkownika (bez zmian).
@@ -290,8 +290,8 @@ stateDiagram-v2
   state "Strona rejestracji" as Rejestracja
   state "Czeka na potwierdzenie e-mail" as Potwierdzenie
   state "Zalogowany" as Zalogowany {
-    state "Onboarding, lekcja 2x5" as Onboarding
-    state "Lista konwersacji i czat, lekcja 2x5" as Aplikacja
+    state "Onboarding, etap UI" as Onboarding
+    state "Lista konwersacji i czat, etap UI" as Aplikacja
     state if_onb <<choice>>
     [*] --> if_onb
     if_onb --> Onboarding: brak klucza lub mniej niż 2 uczestników
@@ -341,7 +341,7 @@ flowchart TD
     RegisterForm["RegisterForm.tsx"]
   end
   subgraph Protected["Strony chronione"]
-    IndexPage["index.astro, placeholder do 2x5"]
+    IndexPage["index.astro, placeholder do etapu UI"]
   end
   subgraph Shared["Współdzielone"]
     Layout["Layout.astro: nagłówek, Help, Logout"]
@@ -381,23 +381,23 @@ Legenda: żółte = istniejące moduły do rozszerzenia, zielone = nowe.
 
 ## 5. Granice i co dalej
 
-- **2x5 (plan UI):** routing po logowaniu wg stanu onboardingu (US-002, US-006), widok ustawień z e-mailem
+- **Etap UI (plan UI):** routing po logowaniu wg stanu onboardingu (US-002, US-006), widok ustawień z e-mailem
   (US-032/033), zastąpienie placeholdera `index.astro`.
-- **3x2:** testy jednostkowe serwisu auth i mapowania błędów. **3x3:** E2E logowania i rejestracji.
-- **3x6:** Site URL / Redirect URLs w Supabase, `secure` cookies za HTTPS, weryfikacja e-mail na produkcji.
+- **Testy jednostkowe:** serwis auth i mapowanie błędów. **E2E:** logowanie i rejestracja.
+- **Wdrożenie:** Site URL / Redirect URLs w Supabase, `secure` cookies za HTTPS, weryfikacja e-mail na produkcji.
 - **V2:** odzyskiwanie hasła (B21), zmiana hasła, usunięcie konta, `getClaims()`, rate limiting aplikacyjny.
 
 ## 6. Cross-check z PRD
 
-| Historyjka                       | Element specyfikacji                                                                                                                                                        |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| US-001 rejestracja               | `register.astro` + `RegisterForm` → `POST /api/auth/register`; `confirmation_required` rozróżnia local dev (sesja, `/`) od produkcji (komunikat, potwierdzenie, `/login`)   |
-| US-002 logowanie                 | `login.astro` + `LoginForm` → `POST /api/auth/login`; middleware `302 /login` dla gościa; redirect zalogowanego z `/login`; kryterium „przekierowanie wg onboardingu" → 2x5 |
-| US-003 wylogowanie               | `LogoutButton` w nagłówku `Layout` (każda strona za sesją) → `POST /api/auth/logout` → cookies skasowane → `/login`                                                         |
-| US-032/033 e-mail w ustawieniach | `locals.user.email` dostępny na każdej stronie; widok ustawień w 2x5                                                                                                        |
-| US-034 Help                      | link w nagłówku `Layout`                                                                                                                                                    |
-| PRD §3.1 zasięg ochrony          | middleware: whitelist czterech ścieżek + statyki, reszta za sesją                                                                                                           |
-| PRD §4.1 poza MVP                | brak stron i endpointów resetu; whitelist middleware wyczyszczona                                                                                                           |
+| Historyjka                       | Element specyfikacji                                                                                                                                                            |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| US-001 rejestracja               | `register.astro` + `RegisterForm` → `POST /api/auth/register`; `confirmation_required` rozróżnia local dev (sesja, `/`) od produkcji (komunikat, potwierdzenie, `/login`)       |
+| US-002 logowanie                 | `login.astro` + `LoginForm` → `POST /api/auth/login`; middleware `302 /login` dla gościa; redirect zalogowanego z `/login`; kryterium „przekierowanie wg onboardingu" → etap UI |
+| US-003 wylogowanie               | `LogoutButton` w nagłówku `Layout` (każda strona za sesją) → `POST /api/auth/logout` → cookies skasowane → `/login`                                                             |
+| US-032/033 e-mail w ustawieniach | `locals.user.email` dostępny na każdej stronie; widok ustawień w etapie UI                                                                                                      |
+| US-034 Help                      | link w nagłówku `Layout`                                                                                                                                                        |
+| PRD §3.1 zasięg ochrony          | middleware: whitelist czterech ścieżek + statyki, reszta za sesją                                                                                                               |
+| PRD §4.1 poza MVP                | brak stron i endpointów resetu; whitelist middleware wyczyszczona                                                                                                               |
 
 Sprzeczności z PRD po poprawkach z 2026-09-12: brak. Nadmiarowe względem PRD: nic (tabela `profiles`
 i endpoint „sprawdź sesję" z typowych propozycji modeli — świadomie nieobecne).

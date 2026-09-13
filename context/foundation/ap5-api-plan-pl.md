@@ -716,7 +716,7 @@
 
 ### 2.6. Auth (sesja przeglądarkowa)
 
-Endpointy pośredniczące między formularzami a Supabase Auth (decyzja 2026-09-12, E3, lekcja 3x1). Ustawiają i kasują cookies sesji przez `@supabase/ssr`; kod w przeglądarce nigdy nie rozmawia z Supabase Auth bezpośrednio, więc klient Supabase i klucz anon nie trafiają do JavaScriptu strony. Szczegóły mechanizmu: §3.1; architektura: ap6.
+Endpointy pośredniczące między formularzami a Supabase Auth (decyzja 2026-09-12, E3, etap auth). Ustawiają i kasują cookies sesji przez `@supabase/ssr`; kod w przeglądarce nigdy nie rozmawia z Supabase Auth bezpośrednio, więc klient Supabase i klucz anon nie trafiają do JavaScriptu strony. Szczegóły mechanizmu: §3.1; architektura: ap6.
 
 #### POST /api/auth/login
 
@@ -833,7 +833,7 @@ Endpointy pośredniczące między formularzami a Supabase Auth (decyzja 2026-09-
 
 ### 3.1. Mechanizm uwierzytelniania
 
-**Typ:** Supabase Auth (JWT). Dwa nośniki tokenu (decyzja 2026-09-12, E3, lekcja 3x1):
+**Typ:** Supabase Auth (JWT). Dwa nośniki tokenu (decyzja 2026-09-12, E3, etap auth):
 
 1. **Sesja cookie (przeglądarka)** — cookies `HttpOnly` ustawiane i czytane wyłącznie po stronie serwera przez `@supabase/ssr` (`createServerClient`, wyłącznie `getAll`/`setAll`). Middleware buduje klienta z cookies żądania i woła `auth.getUser()`; przy wygasłym access tokenie klient odświeża sesję refresh tokenem i zapisuje nowe cookies w odpowiedzi. Strony Astro (SSR) mają użytkownika w `Astro.locals.user` już przy renderze.
 2. **Nagłówek `Authorization: Bearer <token>`** — klienci nieprzeglądarkowi (smoke testy curl, przyszłe integracje). Middleware weryfikuje token przez `auth.getUser(token)` i buduje klienta Supabase z tym tokenem.
@@ -849,7 +849,7 @@ Kolejność w middleware: nagłówek Bearer ma pierwszeństwo; w jego braku spra
 
 **Żądanie bez sesji:** `/api/*` → `401` JSON; strona → `302` na `/login`. Zalogowany na `/login` lub `/register` → `302` na `/`.
 
-**Historia:** do 2026-09-12 plan zakładał wyłącznie Bearer bez cookies („stateless", dawne §8.5) — model odpowiedni dla API, ale ślepy dla stron SSR i wymagający tokenu w JavaScripcie przeglądarki. Lekcja 3x1 i asset `supabase-auth.mdc` ustawiają sesję w cookies; Bearer zostaje jako drugi nośnik, żeby nie tracić 95 smoke testów curl.
+**Historia:** do 2026-09-12 plan zakładał wyłącznie Bearer bez cookies („stateless", dawne §8.5) — model odpowiedni dla API, ale ślepy dla stron SSR i wymagający tokenu w JavaScripcie przeglądarki. Etap auth (za wzorcem `supabase-auth.mdc`) ustawia sesję w cookies; Bearer zostaje jako drugi nośnik, żeby nie tracić 95 smoke testów curl.
 
 ### 3.2. Row-Level Security (RLS)
 
@@ -1342,7 +1342,7 @@ nieistniejącego; handler mapuje oba przypadki na `404`. Dodatkowo handlery filt
 
 ## 9. Testing Strategy
 
-Stan 2026-09-12 (lekcja 3x2, decyzja E4). Pełny plan testów: `specs_ai/ap8-test-plan-pl.md`; konwencje w repo:
+Stan 2026-09-12 (etap testów jednostkowych, decyzja E4). Pełny plan testów: `specs_ai/ap8-test-plan-pl.md`; konwencje w repo:
 `.claude/rules/testing.md`.
 
 ### 9.1. Unit Tests (Vitest, bez sieci i bazy)
@@ -1352,7 +1352,7 @@ Stan 2026-09-12 (lekcja 3x2, decyzja E4). Pełny plan testów: `specs_ai/ap8-tes
 - Logika serwisów bez zapytań: `resolveOnboardingStep`, `getOnboardingStatus` (serwisy zależne mockowane), serwis
   OpenRouter przez szew `fetch` (timeouty, klasy błędów, normalizacja odpowiedzi)
 - Hooki widoków (jsdom, mock `api-client`): semantyka 404/412, stan `pending`, mutacje lokalne listy
-- Po ekstrakcji (3x4, ap8 P4): `formatZodErrors`, `jsonError`, mapowanie błędów OpenRouter → HTTP, auto-tytuł
+- Po ekstrakcji (etap refaktoryzacji, ap8 P4): `formatZodErrors`, `jsonError`, mapowanie błędów OpenRouter → HTTP, auto-tytuł
   (minimum 2 uczestników i tytuł z §2.4), budowa kontekstu (pełna historia), predykaty middleware
 
 ### 9.2. Integration Tests = smoke curl (`sketch/smoke-baseline.sh`, poza repo aplikacji)
@@ -1362,14 +1362,14 @@ Stan 2026-09-12 (lekcja 3x2, decyzja E4). Pełny plan testów: `specs_ai/ap8-tes
   CASCADE / SET NULL; uruchamiany przed commitem zmian endpointów, serwisów lub migracji, wynik w `sketch/baseline-<data>.out`
 - Testów endpointów z mockiem OpenRoutera w Vitest NIE piszemy (E4): dublowałyby smoke z gorszą wiernością
 - Kompensacja przy błędzie zapisu (cleanup konwersacji / wiadomości użytkownika — atomowość aplikacyjna, nie
-  transakcyjna) nie jest osiągalna curlem; kandydat na unit z fałszywym builderem Supabase (ap8 P2b, po 3x4)
+  transakcyjna) nie jest osiągalna curlem; kandydat na unit z fałszywym builderem Supabase (ap8 P2b, po etapie refaktoryzacji)
 
-### 9.3. E2E Tests (Playwright, lekcja 3x3)
+### 9.3. E2E Tests (Playwright)
 
 - User flow: register/login → onboarding → create participant → new conversation → send message
 - Error scenarios: invalid API key, network timeout
 - Delete scenarios: conversation delete, participant delete
-- Koszt wywołań OpenRoutera w E2E → decyzja o stubie w 3x3
+- Koszt wywołań OpenRoutera w E2E → decyzja o stubie w etapie E2E
 
 ---
 
