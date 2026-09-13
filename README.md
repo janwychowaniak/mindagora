@@ -89,7 +89,7 @@ MindAgora is designed for users who:
 - **Vitest 4** - Unit tests for helpers, services, hooks and components (`npm test`), jsdom for DOM tests
 - **React Testing Library** + **user-event** - Hook and component tests
 - **curl smoke suite** - Integration tests of every endpoint against the local Supabase stack and the real
-  OpenRouter API, kept in the maintainer's workspace outside this repo
+  OpenRouter API (`scripts/smoke/smoke-baseline.sh`, compared against the last baseline run)
 - **Playwright** - End-to-end scenarios in `e2e/` (Chromium, page objects, the local Supabase stack, real OpenRouter
   calls when `E2E_OPENROUTER_KEY` is set in `.env.test`)
 

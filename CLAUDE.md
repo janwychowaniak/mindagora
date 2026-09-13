@@ -33,6 +33,8 @@ GitHub Actions · Docker (image on GHCR) · Node 24 (`.nvmrc`) · Supabase CLI a
 - `src/lib/` — services and helpers; `src/assets/` — static internal assets; `public/` — public assets
 - `supabase/migrations/` — nine atomic migrations (enums → tables → indexes → triggers → RLS)
 - `e2e/` — Playwright scenarios and page objects (`playwright.config.ts`, `.env.test` from `.env.test.example`)
+- `scripts/smoke/` — the curl smoke suite (integration layer): every endpoint against the local Supabase stack and
+  the real OpenRouter API; run before committing endpoint, service or migration changes
 - `context/` — the written foundation (`foundation/`: MVP, PRD, tech stack, DB plan, API plan, auth spec, UI plan,
   test plans, hosting analysis; `archive/`: executed implementation plans); index in `context/README.md`
 - `.github/workflows/` — `pull-request.yml` (CI on PRs), `master.yml` (lint, unit tests, container image to GHCR on every
@@ -73,7 +75,7 @@ _Starter recommendations from the 10x-astro-starter rules, carried over verbatim
 - Endpoint by endpoint, reviewed. Never "generate the whole API in one prompt".
 - Real integration over mocks where a mock would double the work (OpenRouter is called for real).
 - New logic with a pure seam ships with its unit test in the same commit (rules: `.claude/rules/testing.md`); endpoint
-  changes rerun the smoke suite. Unit tests never touch the network or the database.
+  changes rerun the smoke suite (`scripts/smoke/`). Unit tests never touch the network or the database.
 - Security first: RLS from day one; `SUPABASE_SERVICE_ROLE_KEY` is never used in user-facing code.
 - One decision = one commit. Commit messages in English, imperative, with the reason in the body.
 - Changes reach `master` through a pull request (one per phase or lesson), merged only when CI is green and with a
@@ -84,7 +86,7 @@ _Starter recommendations from the 10x-astro-starter rules, carried over verbatim
 ## Status (September 2026)
 
 Done: schema + RLS, DTOs, OpenRouter service (unit-tested), 12 REST endpoints + 3 auth endpoints (verified by a
-curl smoke suite kept in the maintainer's workspace outside this repo), cookie session with Bearer kept for
+curl smoke suite in `scripts/smoke/`), cookie session with Bearer kept for
 non-browser clients, the full MVP UI (onboarding, settings, conversation list, chat), and unit tests with Vitest +
 Testing Library for the helpers, onboarding logic, HTTP client, view hooks and the chat / title-editor components
 (test plans in `context/foundation/`), and Playwright E2E scenarios (auth, onboarding, conversation, list)
