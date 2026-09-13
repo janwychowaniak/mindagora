@@ -6,7 +6,8 @@ against them. Read them as intent and reasoning; on any question of behaviour th
 
 **Language note.** The foundation documents are in Polish, the language of the course and of the maintainer's
 working notes. Everything else in this repository (code, comments, commits, README, rules) is in English. This is
-a deliberate deviation recorded in `CLAUDE.md`.
+a deliberate deviation recorded in `CLAUDE.md`; the risk-first test plan below is the one document written in
+English from the start.
 
 **History.** The documents lived in `.ai/` at the beginning of the project, then in the maintainer's workspace
 outside the repository, and returned here on 2026-09-13 in the 10xDevs 3.0 layout (`foundation/` for the
@@ -24,6 +25,7 @@ maintained).
 | api plan            | `foundation/ap5-api-plan-pl.md`         | The REST API: resources, endpoints, validation rules, status codes and error labels, security, test notes                                                                                                                   | source of truth with the code (§9 describes the test levels) |
 | auth spec           | `foundation/ap6-auth-spec-pl.md`        | Session model (cookie session for the browser, Bearer for non-browser clients), middleware, protected routes, three Mermaid diagrams                                                                                        | current                                                      |
 | ui plan             | `foundation/ap7-ui-plan-pl.md`          | UI architecture: route map, views, islands, hooks, error matrix (401 → sign-in, 412 → settings)                                                                                                                             | current                                                      |
+| test-plan           | `foundation/test-plan.md`               | Risk-first test plan in the 10xDevs 3.0 schema: strategy, risk map with response guidance, phased rollout, stack, quality gates, cookbook with the risk → test index, negative space, freshness ledger                      | current (English)                                            |
 | test plan, detailed | `foundation/ap8-test-plan-pl.md`        | The detailed plan behind it: test levels, unit candidates per module, what is not unit-tested and why, smoke and e2e scenario tables, environment, tools                                                                    | current                                                      |
 | infrastructure      | `foundation/ap9-hosting-analysis-pl.md` | Hosting analysis that led to Railway (container image on GHCR), Cloudflare and Supabase cloud; the release flow is documented in the README, "Deployment & Releases"                                                        | current                                                      |
 | roadmap             | —                                       | No roadmap document. The project followed the course lessons in order; the decision inventory with statuses lives in the maintainer's workspace. The README, "Project Status", states where the product is.                 | —                                                            |

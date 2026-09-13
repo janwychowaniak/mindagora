@@ -8,10 +8,11 @@ paths:
 
 # Testing rules
 
-Test plan and the reasoning behind every choice here: `specs_ai/ap8-test-plan-pl.md` in the maintainer's workspace
-(outside this repo). The pyramid: unit tests (Vitest, no network, no database) → integration (the curl smoke suite in
-the maintainer's workspace, real Supabase and OpenRouter) → E2E (Playwright, planned). Endpoints and Supabase services
-are covered by the smoke suite, not by unit tests with mocked Supabase.
+Test plan: `context/foundation/test-plan.md` (risk map, phased rollout, quality gates, the cookbook with the
+risk → test index) and the detailed plan behind it, `context/foundation/ap8-test-plan-pl.md` (Polish). The pyramid:
+unit tests (Vitest, no network, no database) → integration (the curl smoke suite in the maintainer's workspace, real
+Supabase and OpenRouter) → E2E (Playwright). Endpoints and Supabase services are covered by the smoke suite, not by
+unit tests with mocked Supabase.
 
 ## Starter recommendations
 

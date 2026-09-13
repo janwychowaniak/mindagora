@@ -312,7 +312,8 @@ domain (`www` redirects to the root), and a Supabase cloud project in the EU hol
 The application was built from written documents, not the other way round. They live in [`context/`](context/README.md):
 
 - `context/foundation/` — the MVP definition, the PRD, the tech stack, the database plan, the REST API plan, the
-  authentication spec, the UI plan, the detailed test plan and the hosting analysis
+  authentication spec, the UI plan, the test plans (`test-plan.md`: risks, rollout, quality gates and the
+  risk → test index; `ap8-test-plan-pl.md`: the detailed plan) and the hosting analysis
 - `context/archive/` — the implementation plans that were executed for every endpoint, the OpenRouter service and
   every view, kept as a record of the reasoning at the time
 
