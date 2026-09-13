@@ -1,8 +1,9 @@
 # MindAgora
 
 Multi-model chat: one conversation, many AI participants (OpenRouter models), one fully shared context.
-Course project (10xDevs 2.0), MVP in progress. The maintainer talks to Claude in Polish; everything inside
-this repository is in English: code, comments, commit messages, docs.
+Course project (10xDevs 2.0), MVP live. The maintainer talks to Claude in Polish; everything inside
+this repository is in English: code, comments, commit messages, docs. The one deliberate exception is `context/`:
+the foundation documents were written in Polish during the course (see `context/README.md`).
 
 ## Core value proposition (do not erode)
 
@@ -32,6 +33,8 @@ GitHub Actions · Docker (image on GHCR) · Node 24 (`.nvmrc`) · Supabase CLI a
 - `src/lib/` — services and helpers; `src/assets/` — static internal assets; `public/` — public assets
 - `supabase/migrations/` — nine atomic migrations (enums → tables → indexes → triggers → RLS)
 - `e2e/` — Playwright scenarios and page objects (`playwright.config.ts`, `.env.test` from `.env.test.example`)
+- `context/` — the written foundation (`foundation/`: MVP, PRD, tech stack, DB plan, API plan, auth spec, UI plan,
+  test plans, hosting analysis; `archive/`: executed implementation plans); index in `context/README.md`
 - `.github/workflows/` — `pull-request.yml` (CI on PRs), `master.yml` (lint, unit tests, container image to GHCR on every
   push to `master`) and `gitleaks.yml`; `.github/actions/node-setup` is the shared Node + `npm ci` step
 - `.githooks/` — gitleaks + lint-staged hooks; after cloning run `git config core.hooksPath .githooks`
@@ -84,7 +87,7 @@ Done: schema + RLS, DTOs, OpenRouter service (unit-tested), 12 REST endpoints + 
 curl smoke suite kept in the maintainer's workspace outside this repo), cookie session with Bearer kept for
 non-browser clients, the full MVP UI (onboarding, settings, conversation list, chat), and unit tests with Vitest +
 Testing Library for the helpers, onboarding logic, HTTP client, view hooks and the chat / title-editor components
-(the test plan lives in the maintainer's workspace), and Playwright E2E scenarios (auth, onboarding, conversation, list)
+(test plans in `context/foundation/`), and Playwright E2E scenarios (auth, onboarding, conversation, list)
 on the local Supabase stack with real OpenRouter calls, and CI on pull requests (`.github/workflows/pull-request.yml`:
 lint + type check, unit tests, E2E on a Supabase stack in the runner, production build, PR status comment). Deployed at https://mindagora.ai
 (Railway from the GHCR image, `master.yml` with the `production` environment gate, Supabase cloud project; see README

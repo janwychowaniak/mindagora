@@ -14,6 +14,7 @@ A web application for conducting conversations with multiple AI models simultane
 - [Container Image](#container-image)
 - [Deployment & Releases](#deployment--releases)
 - [Project Scope](#project-scope)
+- [Project Context](#project-context)
 - [Project Status](#project-status)
 - [License](#license)
 
@@ -219,7 +220,7 @@ domain (`www` redirects to the root), and a Supabase cloud project in the EU hol
 
 ## Project Scope
 
-### MVP Features (In Development)
+### MVP Features (Implemented)
 
 #### Authentication & User Management
 
@@ -306,12 +307,24 @@ domain (`www` redirects to the root), and a Supabase cloud project in the EU hol
 - Advanced error recovery with retry logic
 - Multi-tab synchronization
 
+## Project Context
+
+The application was built from written documents, not the other way round. They live in [`context/`](context/README.md):
+
+- `context/foundation/` — the MVP definition, the PRD, the tech stack, the database plan, the REST API plan, the
+  authentication spec, the UI plan, the detailed test plan and the hosting analysis
+- `context/archive/` — the implementation plans that were executed for every endpoint, the OpenRouter service and
+  every view, kept as a record of the reasoning at the time
+
+The foundation documents are in Polish (the course language); `context/README.md` maps them to the 10xDevs 3.0
+vocabulary and explains the deviation from the English-only rule of this repository.
+
 ## Project Status
 
 🟢 **MVP live at [mindagora.ai](https://mindagora.ai)**
 
 The MVP scope above is implemented, tested (unit, integration smoke, E2E) and deployed; see
-[Deployment & Releases](#deployment--releases). MindAgora is a course project (10xDevs 2.0) that keeps evolving as a
+[Deployment & Releases](#deployment--releases) and [Project Context](#project-context). MindAgora is a course project (10xDevs 2.0) that keeps evolving as a
 portfolio piece and as material for the next course editions.
 
 ### Success Metrics
