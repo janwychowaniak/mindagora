@@ -16,6 +16,15 @@ export default defineConfig({
   adapter: node({
     mode: "standalone",
   }),
+  security: {
+    // Behind a TLS-terminating proxy the adapter does not trust the `Host` header unless the domain is listed
+    // here, so it falls back to `localhost` and Astro's built-in origin check (`security.checkOrigin`, on by
+    // default) rejects every browser write whose `Origin` is the real domain. The check only inspects requests
+    // without a `Content-Type` (or with a form-like one), which is exactly the bodyless ones: sign-out and both
+    // deletes answered 403 "Cross-site POST form submissions are forbidden" in production while every JSON write
+    // passed. Listing the public origin restores a correct `url.origin` and keeps the CSRF check enabled.
+    allowedDomains: [{ hostname: "mindagora.ai", protocol: "https" }],
+  },
   // Runtime configuration. Everything is a server secret on purpose: the Node adapter reads secrets from the process
   // environment at runtime, whereas public variables would be frozen into the bundle at build time and
   // a container image built once has to run against any Supabase project. `import.meta.env` is not an option: Vite
