@@ -135,10 +135,13 @@ export const signUp = async ({
   return { data: { user: data.user, session: data.session }, error: null };
 };
 
+// `scope: "local"` ends only the session that made the request. The library default is "global", which revokes
+// every refresh token of the account and signs the user out of their other browsers and devices — surprising for
+// a header button that says "Logout". Signing out everywhere belongs behind its own explicit control.
 // On a Bearer-bound client (no stored session) the library treats this as a no-op: non-browser
 // clients sign out by discarding their token.
 export const signOut = async ({ supabase }: { supabase: SupabaseClient }): Promise<SignOutResult> => {
-  const { error } = await supabase.auth.signOut();
+  const { error } = await supabase.auth.signOut({ scope: "local" });
 
   if (error) {
     return { data: null, error: toServiceError(error) };

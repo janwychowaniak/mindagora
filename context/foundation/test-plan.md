@@ -196,7 +196,7 @@ The evidence that each risk in §2 is exercised today. Test names are quoted as 
 - Phase 1 (unit): jsdom 30 needs Node 24.15, so jsdom stays on 29 while `.nvmrc` says 24.13; the suite pins the
   time zone to UTC; Radix components are stubbed at the child boundary, not polyfilled.
 - Phase 3 (e2e): an island that has not hydrated submits the form natively, so every action waits for hydration;
-  Supabase sign-out is global, so the logout scenario owns a disposable account; the title editor swaps a button
+  signing out ends the session held in `storageState`, so the logout scenario owns a disposable account; the title editor swaps a button
   for an input, so locators live on the list row, not on the title text.
 - Phase 4 (gates): `npm install typescript` without a version hangs on the `typescript-eslint` peer range, so
   TypeScript is pinned to `~5.8`; in a `pull_request` run the checkout SHA is GitHub's merge commit, so the status

@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-import { extractBearerToken } from "./auth.service.ts";
+import type { SupabaseClient } from "../../db/supabase.client.ts";
+import { extractBearerToken, signOut } from "./auth.service.ts";
 
 const requestWith = (authorization?: string) =>
   new Request("http://localhost:3000/api/conversations", {
@@ -30,5 +31,30 @@ describe("extractBearerToken", () => {
 
   it("tolerates extra whitespace between the scheme and the token", () => {
     expect(extractBearerToken(requestWith("Bearer    abc"))).toBe("abc");
+  });
+});
+
+describe("signOut", () => {
+  // The library default is "global", which would sign the account out of every other browser and device.
+  const clientWith = (result: { error: unknown }) => {
+    const spy = vi.fn().mockResolvedValue(result);
+    return { client: { auth: { signOut: spy } } as unknown as SupabaseClient, spy };
+  };
+
+  it("ends only the session that made the request", async () => {
+    const { client, spy } = clientWith({ error: null });
+
+    await signOut({ supabase: client });
+
+    expect(spy).toHaveBeenCalledWith({ scope: "local" });
+  });
+
+  it("reports a failure from the authentication service", async () => {
+    const { client } = clientWith({ error: { message: "session not found", code: "session_not_found", status: 403 } });
+
+    const result = await signOut({ supabase: client });
+
+    expect(result.error).not.toBeNull();
+    expect(result.data).toBeNull();
   });
 });

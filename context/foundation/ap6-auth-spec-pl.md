@@ -144,7 +144,7 @@ Nowe, wszystkie z parametrem obiektowym i wynikiem `{ data, error }` (`error: { 
 
 - `signInWithPassword({ supabase, email, password })` → `{ data: { user } }`
 - `signUp({ supabase, email, password, emailRedirectTo })` → `{ data: { user, session } }`
-- `signOut({ supabase })` → `{ data: null }`
+- `signOut({ supabase })` → `{ data: null }`; zasięg `local` — kończy tylko sesję, która wysłała żądanie
 
 Serwis nie zna HTTP; mapowanie kodów Supabase (`invalid_credentials`, `email_not_confirmed`,
 `user_already_exists`, `weak_password`) na statusy robi handler. Uwaga: dla klienta Bearer (bez sesji w kliencie)
@@ -190,8 +190,9 @@ zachowują jawne `export const prerender = false` (konwencja repo).
 3. **Odświeżenie:** access token żyje 1 h (`jwt_expiry`); gdy wygasł, `getUser()` wewnętrznie używa refresh
    tokena (rotacja włączona: `enable_refresh_token_rotation = true`, okno ponownego użycia 10 s) i zapisuje nową
    sesję przez `setAll`. Odpowiedź strony lub API niesie nowe cookies.
-4. **Wylogowanie:** `signOut` → unieważnienie refresh tokena po stronie Supabase + `setAll` z pustymi wartościami
-   (kasowanie cookies).
+4. **Wylogowanie:** `signOut({ scope: "local" })` → unieważnienie refresh tokena TEJ sesji po stronie Supabase +
+   `setAll` z pustymi wartościami (kasowanie cookies). Sesje tego samego konta w innych przeglądarkach i na innych
+   urządzeniach zostają nietknięte; wylogowanie wszędzie wymagałoby osobnej akcji (poza MVP).
 5. **Wygaśnięcie bez odświeżenia** (refresh token nieważny): `getUser()` bez użytkownika → gość → `302 /login`
    lub `401`.
 6. **Ścieżka Bearer:** bez cookies; token weryfikowany per żądanie `getUser(token)`; odświeżanie po stronie
@@ -275,8 +276,8 @@ sequenceDiagram
   Note over P,S: Wylogowanie
   P->>M: POST /api/auth/logout z cookie
   M->>A: next() z locals.user
-  A->>S: signOut()
-  S-->>A: OK, refresh token unieważniony
+  A->>S: signOut({ scope: "local" })
+  S-->>A: OK, refresh token tej sesji unieważniony
   A-->>P: 200 + kasowanie cookies
   P->>P: window.location.assign("/login")
 ```

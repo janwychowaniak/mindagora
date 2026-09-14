@@ -41,8 +41,8 @@ test.describe("authentication", () => {
     await expect(page).not.toHaveURL("/login");
   });
 
-  // Logout signs the account out everywhere (Supabase default scope), which would also kill the session the
-  // setup project saved for the other scenarios — so this one uses a throwaway account.
+  // Signing out ends the very session the setup project saved for the other scenarios, so this one uses a
+  // throwaway account. (Scope is "local": other browsers of the same account keep their sessions.)
   test("logging out ends the session", async ({ page }) => {
     const registered = await page.request.post("/api/auth/register", {
       data: { email: `${runTag()}-logout@mindagora.local`, password: e2eAccount().password },
