@@ -1326,6 +1326,8 @@ Sesja przeglądarkowa żyje w cookies (decyzja 2026-09-12, E3), więc CSRF wymag
 
 Wyjątek `POST /api/auth/logout` (bez body, więc bez wymogu `Content-Type`): najgorszy skutek CSRF to wylogowanie użytkownika — akceptowalne, a `SameSite=Lax` i tak blokuje cross-site `POST`. Ścieżka Bearer jest stateless — CSRF jej nie dotyczy.
 
+Druga warstwa pochodzi z frameworka: wbudowana kontrola `security.checkOrigin` odrzuca statusem `403` każde żądanie zmieniające stan, które nie ma `Content-Type` (albo ma formularzowy), jeśli nagłówek `Origin` nie równa się originowi serwera. Dotyczy to dokładnie trzech wywołań bez ciała — wylogowania i obu `DELETE` — bo zapisy z JSON-em są z niej wyłączone. Za proxy kończącym TLS serwer musi znać swój publiczny adres (`security.allowedDomains`), inaczej liczy origin jako `localhost` i blokuje własną aplikację.
+
 ### 8.6. Anti-enumeration: 404 zamiast 403
 
 Dla zasobów adresowanych po `:id` (uczestnik, konwersacja) API **nigdy nie zwraca `403`** dla cudzego zasobu.

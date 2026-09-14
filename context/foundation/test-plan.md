@@ -201,6 +201,12 @@ The evidence that each risk in §2 is exercised today. Test names are quoted as 
 - Phase 4 (gates): `npm install typescript` without a version hangs on the `typescript-eslint` peer range, so
   TypeScript is pinned to `~5.8`; in a `pull_request` run the checkout SHA is GitHub's merge commit, so the status
   comment names the head SHA explicitly.
+- **Known structural gap — every layer runs against the dev server.** Unit tests stub `fetch`, the smoke suite and
+  Playwright both drive `astro dev`. The adapter runtime that actually ships (`dist/server/entry.mjs`) mounts
+  middleware the dev server does not — the origin check among it — so a whole class of defects is invisible to all
+  three layers and reaches production green. It cost a live break of sign-out and both deletes. Until a gate covers
+  the built artefact, any change to `astro.config.mjs`, the adapter, or request handling gets a manual pass: build,
+  serve `dist/server/entry.mjs`, and send a write with `Origin` set to the public domain.
 
 ## 7. What We Deliberately Don't Test
 

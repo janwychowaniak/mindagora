@@ -214,7 +214,9 @@ podpisuje tokeny kluczem symetrycznym legacy, a round-trip do Auth per żądanie
 ### 3.4. Bezpieczeństwo
 
 - **CSRF** (ap5 §8.5): `SameSite=Lax` + `HttpOnly` + wymóg `Content-Type: application/json` na zapisach + brak
-  zapisów przez `GET`. Wyjątek `logout` bez body: skutek ataku to co najwyżej wylogowanie.
+  zapisów przez `GET`. Wyjątek `logout` bez body: skutek ataku to co najwyżej wylogowanie. Do tego kontrola
+  `security.checkOrigin` frameworka, która obejmuje właśnie żądania bez `Content-Type` (wylogowanie i oba `DELETE`) —
+  wymaga, by publiczny adres był wpisany w `security.allowedDomains`, inaczej odrzuca własną aplikację statusem `403`.
 - **XSS:** token nigdy nie jest dostępny z JS (`HttpOnly`); klucz anon nie jest wysyłany do przeglądarki; React
   escape'uje treści; komunikaty Supabase renderowane jako tekst.
 - **Enumeracja kont:** na produkcji Supabase ukrywa istnienie adresu przy rejestracji; przy logowaniu komunikat

@@ -209,7 +209,13 @@ domain (`www` redirects to the root), and a Supabase cloud project in the EU hol
   before switching traffic). Approve or reject a pending deployment promptly: it holds the workflow's concurrency group.
 - **Configuration** lives only in the Railway service variables (`SUPABASE_URL`, `SUPABASE_KEY`, `SITE_URL`,
   `OPENROUTER_HTTP_REFERER`, `OPENROUTER_X_TITLE`; `PORT` comes from the image) and in the environment secret
-  `RAILWAY_TOKEN`. Nothing is baked into the image and nothing is committed.
+  `RAILWAY_TOKEN`. No secret is baked into the image and none is committed. The one build-time constant is the public
+  domain, below.
+- **Public domain:** `security.allowedDomains` in `astro.config.mjs` must list the domain the browser uses. Behind a
+  TLS-terminating proxy the Node adapter otherwise distrusts the `Host` header, falls back to `localhost`, and Astro's
+  origin check (`security.checkOrigin`) answers 403 to every browser request that carries no `Content-Type` — sign-out
+  and both deletes — while JSON writes keep working. The dev server does not run that check, so only a production
+  build shows it: serve `dist/server/entry.mjs` and send a request with `Origin` set to the public domain.
 - **Database changes** reach the cloud project from a maintainer's machine with `npx supabase link --project-ref <ref>`
   and `npx supabase db push`, before the release that needs them.
 - **Plans:** Railway Hobby keeps the service always on (the free plan stops it once the monthly credit is used up).
