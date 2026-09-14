@@ -14,7 +14,10 @@ export function LogoutButton() {
     setError(null);
 
     const result = await apiPost<ApiSuccessResponseDTO>("/api/auth/logout");
-    if (!result.ok) {
+    // A 401 means the session is already gone (it expired, or it was ended elsewhere). The goal of the click is
+    // reached, so finish like a success instead of telling the visitor to retry something that cannot succeed.
+    // `api-client` deliberately skips its own 401 redirect for /api/auth/*, so this view handles it.
+    if (!result.ok && result.failure.status !== 401) {
       setError(result.failure.status === 0 ? result.failure.message : "Logout failed. Please try again.");
       setPending(false);
       return;
