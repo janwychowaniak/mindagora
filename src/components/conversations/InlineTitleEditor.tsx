@@ -77,7 +77,7 @@ export function InlineTitleEditor({ title, onSave }: InlineTitleEditorProps) {
         type="button"
         onClick={startEditing}
         title="Click to rename"
-        className="max-w-full truncate text-left font-medium hover:underline focus-visible:underline focus-visible:outline-none"
+        className="max-w-full cursor-pointer truncate text-left font-medium hover:underline focus-visible:underline focus-visible:outline-none"
         data-testid="conversation-title"
       >
         {title}
